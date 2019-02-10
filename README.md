@@ -1,6 +1,51 @@
 # FsLibLog
 
-[Enter useful description for FsLibLog]
+FsLibLog is a single file you can copy paste or add through [Paket Github dependencies](https://fsprojects.github.io/Paket/github-dependencies.html) to provide your library with a logging abstraction.
+
+
+## Getting started
+
+### 1. Put the file into your project
+
+#### Option 1
+
+Copy/paste [FsLibLog.fs](https://github.com/TheAngryByrd/FsLibLog/blob/master/src/FsLibLog/FsLibLog.fs) into your library 
+
+#### Option 2
+
+Read over [Paket Github dependencies](https://fsprojects.github.io/Paket/github-dependencies.html).
+
+Add the following line to your `paket.depedencies` file.
+
+```
+github TheAngryByrd/FsLibLog src/FsLibLog/FsLibLog.fs
+```
+
+Then add the following line to projects with `paket.references` file you want FsLibLog to be available to.
+
+```
+File: FsLibLog.fs
+```
+
+
+### 2. Replace its namespace with yours
+
+To alleviate potential naming conflicts, it's best to replace FsLibLog namespace with your own.
+
+Here is an example with FAKE 5:
+
+```fsharp
+Target.create "Replace" <| fun _ ->
+  Shell.ReplaceInFiles
+    [ "FsLibLog", "MyLib.Logging" ]
+    (!! "paket-files/TheAngryByrd/FsLibLog/src/FsLibLog/FsLibLog.fs")
+```
+
+
+## Currently supported providers
+
+- [Serilog](https://github.com/serilog/serilog)
+- Console
 
 ---
 
@@ -11,12 +56,6 @@ MacOS/Linux | Windows
 [![Travis Badge](https://travis-ci.org/TheAngryByrd/FsLibLog.svg?branch=master)](https://travis-ci.org/TheAngryByrd/FsLibLog) | [![Build status](https://ci.appveyor.com/api/projects/status/github/TheAngryByrd/FsLibLog?svg=true)](https://ci.appveyor.com/project/TheAngryByrd/FsLibLog)
 [![Build History](https://buildstats.info/travisci/chart/TheAngryByrd/FsLibLog)](https://travis-ci.org/TheAngryByrd/FsLibLog/builds) | [![Build History](https://buildstats.info/appveyor/chart/TheAngryByrd/FsLibLog)](https://ci.appveyor.com/project/TheAngryByrd/FsLibLog)  
 
-
-## Nuget 
-
-Stable | Prerelease
---- | ---
-[![NuGet Badge](https://buildstats.info/nuget/FsLibLog)](https://www.nuget.org/packages/FsLibLog/) | [![NuGet Badge](https://buildstats.info/nuget/FsLibLog?includePreReleases=true)](https://www.nuget.org/packages/FsLibLog/)
 
 ---
 
