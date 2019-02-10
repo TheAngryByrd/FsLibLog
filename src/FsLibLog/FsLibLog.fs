@@ -258,15 +258,17 @@ module LogProvider =
 
     let private knownProviders = [
         (SerilogProvider.isAvailable , SerilogProvider.create)
-        (ConsoleProvider.isAvailable, ConsoleProvider.create)
+        // (ConsoleProvider.isAvailable, ConsoleProvider.create)
     ]
 
     /// Greedy search for first available LogProvider. Order of known providers matters.
     let private resolvedLogger = lazy (
         knownProviders
-        |> Seq.find(fun (isAvailable,_) -> isAvailable ())
-        |> fun (_, create) -> create()
+        |> Seq.tryFind(fun (isAvailable,_) -> isAvailable ())
+        |> Option.map(fun (_, create) -> create())
     )
+
+    let  inline noopLogger _ _ _ _ = false
 
     /// **Description**
     ///
@@ -293,8 +295,11 @@ module LogProvider =
         let loggerProvider =
             match currentLogProvider with
             | None -> resolvedLogger.Value
-            | Some p -> p
-        let logFunc = loggerProvider.GetLogger(``type``.ToString())
+            | Some p -> Some p
+        let logFunc =
+            match loggerProvider with
+            | Some loggerProvider -> loggerProvider.GetLogger(``type``.ToString())
+            | None -> noopLogger
         { new ILog with member x.Log = logFunc}
 
     /// **Description**
