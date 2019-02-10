@@ -4,7 +4,8 @@ module LogProvider =
     open System
     open Types
     open System.Diagnostics
-    let mutable private logProvider = ConsoleProvider.create()
+    // let mutable private logProvider = ConsoleProvider.create()
+    let mutable private logProvider = SerilogProvider.create()
 
     let getLogger (``type`` : Type) =
         let logFunc = logProvider.GetLogger(``type``.ToString())

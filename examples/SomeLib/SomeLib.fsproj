@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../src/FsLibLog/Types.fs" />
+    <Compile Include="../../src/FsLibLog/Providers/ConsoleProvider.fs" />
+    <Compile Include="../../src/FsLibLog/Providers/SerilogProvider.fs" />
+    <Compile Include="../../src/FsLibLog/LogProvider.fs" />
+    <Compile Include="Library.fs" />
+  </ItemGroup>
+
+</Project>
