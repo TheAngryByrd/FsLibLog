@@ -6,6 +6,7 @@ open SomeLib
 
 [<EntryPoint>]
 let main argv =
+    // FsLibLog.LogProvider.setLoggerProvider <| FsLibLog.SerilogProvider.create()
     let log =
         LoggerConfiguration()
             .WriteTo.ColoredConsole(outputTemplate= "{Timestamp:HH:mm} [{Level}] ({Name:l}) {Message}{NewLine}{Exception}")

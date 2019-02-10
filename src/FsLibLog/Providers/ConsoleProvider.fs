@@ -5,6 +5,8 @@ module ConsoleProvider =
     open System.Globalization
     open Types
 
+    let isAvailable () = true
+
     type private ConsoleProvider () =
         let threadSafeWriter =  MailboxProcessor.Start(fun inbox ->
             let rec loop () = async {
