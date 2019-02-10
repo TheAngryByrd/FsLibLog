@@ -24,10 +24,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Types.fs" />
-    <Compile Include="Providers/ConsoleProvider.fs" />
-    <Compile Include="Providers/SerilogProvider.fs" />
-    <Compile Include="LogProvider.fs" />
+    <Compile Include="FsLibLog.fs" />
   </ItemGroup>
   <Import Project="..\..\fsc.props" />
   <Import Project="..\..\netfx.props" />
