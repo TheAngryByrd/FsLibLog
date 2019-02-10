@@ -309,6 +309,6 @@ module LogProvider =
     /// **Output Type**
     ///   * `ILog`
     ///
-    let inline getCurrentLogger ()   =
-        let stackFrame = StackFrame(0, false)
+    let getCurrentLogger ()   =
+        let stackFrame = StackFrame(2, false)
         getLogger(stackFrame.GetMethod().DeclaringType)
