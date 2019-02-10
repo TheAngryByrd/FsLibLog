@@ -53,8 +53,8 @@ Target.create "Replace" <| fun _ ->
 
 MacOS/Linux | Windows
 --- | ---
-[![Travis Badge](https://travis-ci.org/TheAngryByrd/FsLibLog.svg?branch=master)](https://travis-ci.org/TheAngryByrd/FsLibLog) | [![Build status](https://ci.appveyor.com/api/projects/status/github/TheAngryByrd/FsLibLog?svg=true)](https://ci.appveyor.com/project/TheAngryByrd/FsLibLog)
-[![Build History](https://buildstats.info/travisci/chart/TheAngryByrd/FsLibLog)](https://travis-ci.org/TheAngryByrd/FsLibLog/builds) | [![Build History](https://buildstats.info/appveyor/chart/TheAngryByrd/FsLibLog)](https://ci.appveyor.com/project/TheAngryByrd/FsLibLog)  
+[![Travis Badge](https://travis-ci.org/TheAngryByrd/FsLibLog.svg?branch=master)](https://travis-ci.org/TheAngryByrd/FsLibLog) | [![Build status](https://ci.appveyor.com/api/projects/status/github/TheAngryByrd/fsliblog?svg=true)](https://ci.appveyor.com/project/TheAngryByrd/FsLibLog)
+[![Build History](https://buildstats.info/travisci/chart/TheAngryByrd/FsLibLog)](https://travis-ci.org/TheAngryByrd/FsLibLog/builds) | [![Build History](https://buildstats.info/appveyor/chart/TheAngryByrd/FsLibLog)](https://ci.appveyor.com/project/TheAngryByrd/fsliblog)  
 
 
 ---
