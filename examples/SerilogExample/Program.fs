@@ -10,7 +10,7 @@ let main argv =
             .CreateLogger();
     Log.Logger <- log
 
-    Say.hello "Captain"
+    Say.hello "Captain" |> printfn "%A"
 
     Console.ReadLine() |> ignore
     0

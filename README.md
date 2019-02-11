@@ -1,6 +1,6 @@
 # FsLibLog
 
-FsLibLog is a single file you can copy paste or add through [Paket Github dependencies](https://fsprojects.github.io/Paket/github-dependencies.html) to provide your library with a logging abstraction.
+FsLibLog is a single file you can copy paste or add through [Paket Github dependencies](https://fsprojects.github.io/Paket/github-dependencies.html) to provide your F# library with a logging abstraction.  This is a port of the C# [LibLog](https://github.com/damianh/LibLog).
 
 
 ## Getting started
@@ -42,10 +42,31 @@ Target.create "Replace" <| fun _ ->
 ```
 
 
+## Using in your library
+
+Example:
+
+```fsharp
+namespace SomeLib
+open FsLibLog
+open FsLibLog.Types
+
+module Say =
+    let logger = LogProvider.getCurrentLogger()
+
+    let hello name =
+        logger.warn(
+            Log.setMessage ("{name} Was said hello to" )
+            >> Log.addParameters [name]
+        )
+        sprintf "hello %s" name
+
+```
+
+
 ## Currently supported providers
 
 - [Serilog](https://github.com/serilog/serilog)
-- Console
 
 ---
 

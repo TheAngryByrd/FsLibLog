@@ -19,9 +19,201 @@ module Types =
     /// The signature of a log message function
     type Logger = LogLevel -> MessageThunk -> exn option -> obj array -> bool
 
+    /// Type representing a Log
+    type Log = {
+        LogLevel : LogLevel
+        Message : MessageThunk
+        Exception : exn option
+        Parameters : obj list
+    }
+        with
+            static member StartLogLevel (logLevel : LogLevel) =
+                {
+                    LogLevel = logLevel
+                    Message = None
+                    Exception = None
+                    Parameters = List.empty
+                }
+
     /// An interface wrapper for `Logger`. Useful when using depedency injection frameworks.
     type ILog =
         abstract member Log :  Logger
+
+    [<AutoOpen>]
+    module Inner =
+        type ILog with
+
+            /// **Description**
+            ///
+            /// Logs a log
+            ///
+            /// **Parameters**
+            ///   * `log` - parameter of type `Log`
+            ///
+            /// **Output Type**
+            ///   * `bool`
+            member logger.fromLog (log : Log) =
+                printfn "%A" log
+                log.Parameters
+                |> List.toArray
+                |> logger.Log log.LogLevel log.Message log.Exception
+
+            /// **Description**
+            ///
+            /// Logs a fatal log message given a log configurer.  Lets caller know if log was sent with boolean return.
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `bool`
+            member logger.fatal' (logConfig : Log -> Log) =
+                Log.StartLogLevel LogLevel.Fatal
+                |> logConfig
+                |> logger.fromLog
+
+            /// **Description**
+            ///
+            /// Logs a fatal log message given a log configurer
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `unit`
+            member logger.fatal (logConfig : Log -> Log) =
+                logger.fatal' logConfig |> ignore
+
+            /// **Description**
+            ///
+            /// Logs a error log message given a log configurer.  Lets caller know if log was sent with boolean return.
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `bool`
+            member logger.error' (logConfig : Log -> Log) =
+                Log.StartLogLevel LogLevel.Error
+                |> logConfig
+                |> logger.fromLog
+
+            /// **Description**
+            ///
+            /// Logs an error log message given a log configurer
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `unit`
+            member logger.error (logConfig : Log -> Log) =
+                logger.error' logConfig |> ignore
+
+            /// **Description**
+            ///
+            /// Logs a warn log message given a log configurer.  Lets caller know if log was sent with boolean return.
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `bool`
+            member logger.warn' (logConfig : Log -> Log) =
+                Log.StartLogLevel LogLevel.Warn
+                |> logConfig
+                |> logger.fromLog
+
+            /// **Description**
+            ///
+            /// Logs a warn log message given a log configurer
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `unit`
+            member logger.warn (logConfig : Log -> Log) =
+                logger.warn' logConfig |> ignore
+
+            /// **Description**
+            ///
+            /// Logs a info log message given a log configurer.  Lets caller know if log was sent with boolean return.
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `bool`
+            member logger.info' (logConfig : Log -> Log) =
+                Log.StartLogLevel LogLevel.Info
+                |> logConfig
+                |> logger.fromLog
+
+            /// **Description**
+            ///
+            /// Logs a info log message given a log configurer
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `unit`
+            member logger.info (logConfig : Log -> Log) =
+                logger.info' logConfig |> ignore
+
+            /// **Description**
+            ///
+            /// Logs a debug log message given a log configurer.  Lets caller know if log was sent with boolean return.
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `bool`
+            member logger.debug' (logConfig : Log -> Log) =
+                Log.StartLogLevel LogLevel.Debug
+                |> logConfig
+                |> logger.fromLog
+
+            /// **Description**
+            ///
+            /// Logs a debug log message given a log configurer
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `unit`
+            member logger.debug (logConfig : Log -> Log) =
+                logger.debug' logConfig |> ignore
+
+            /// **Description**
+            ///
+            /// Logs a trace log message given a log configurer.  Lets caller know if log was sent with boolean return.
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `bool`
+            member logger.trace' (logConfig : Log -> Log) =
+                Log.StartLogLevel LogLevel.Trace
+                |> logConfig
+                |> logger.fromLog
+
+            /// **Description**
+            ///
+            /// Logs a trace log message given a log configurer
+            ///
+            /// **Parameters**
+            ///   * `logConfig` - parameter of type `Log -> Log`
+            ///
+            /// **Output Type**
+            ///   * `unit`
+            member logger.trace (logConfig : Log -> Log) =
+                logger.trace' logConfig |> ignore
+
 
     /// An interface for retrieving a concrete logger such as Serilog, Nlog, etc.
     type ILogProvider =
@@ -29,8 +221,107 @@ module Types =
         abstract member OpenNestedContext : string -> IDisposable
         abstract member OpenMappedContext : string -> obj -> bool -> IDisposable
 
+    module Log =
 
+        /// **Description**
+        ///
+        /// Amends a `Log` with a message
+        ///
+        /// **Parameters**
+        ///   * `message` - parameter of type `string`
+        ///   * `log` - parameter of type `Log`
+        ///
+        /// **Output Type**
+        ///   * `Log`
+        let setMessage (message : string) (log : Log) =
+            { log with Message = Some (fun () -> message) }
+
+        /// **Description**
+        ///
+        /// Amends a `Log` with a message thunk
+        ///
+        /// **Parameters**
+        ///   * `messageThunk` - parameter of type `unit -> string`
+        ///   * `log` - parameter of type `Log`
+        ///
+        /// **Output Type**
+        ///   * `Log`
+        ///
+        /// **Exceptions**
+        ///
+        let setMessageThunk (messageThunk : unit -> string) (log : Log) =
+            { log with Message = Some messageThunk }
+
+        /// **Description**
+        ///
+        /// Amends a `Log` with a parameter
+        ///
+        /// **Parameters**
+        ///   * `param` - parameter of type `'a`
+        ///   * `log` - parameter of type `Log`
+        ///
+        /// **Output Type**
+        ///   * `Log`
+        ///
+        /// **Exceptions**
+        ///
+        let addParameter (param : 'a) (log : Log) =
+            { log with Parameters = (box param) :: log.Parameters }
+
+        /// **Description**
+        ///
+        /// Amends a `Log` with a list of parameters
+        ///
+        /// **Parameters**
+        ///   * `params` - parameter of type `'a list`
+        ///   * `log` - parameter of type `Log`
+        ///
+        /// **Output Type**
+        ///   * `Log`
+        ///
+        /// **Exceptions**
+        ///
+        let addParameters (``params`` : 'a list) (log : Log) =
+            let ``params`` =
+                ``params``
+                |> List.map box
+            { log with Parameters = log.Parameters @ ``params`` }
+
+        /// **Description**
+        ///
+        /// Amends a `Log` with an `exn`
+        ///
+        /// **Parameters**
+        ///   * `exception` - parameter of type `exn`
+        ///   * `log` - parameter of type `Log`
+        ///
+        /// **Output Type**
+        ///   * `Log`
+        ///
+        /// **Exceptions**
+        ///
+        let addException (``exception`` : exn) (log : Log) =
+            { log with Exception = Some ``exception``}
+
+
+        /// **Description**
+        ///
+        /// Amends a `Log` with a given `LogLevel`
+        ///
+        /// **Parameters**
+        ///   * `logLevel` - parameter of type `LogLevel`
+        ///   * `log` - parameter of type `Log`
+        ///
+        /// **Output Type**
+        ///   * `Log`
+        ///
+        /// **Exceptions**
+        ///
+        let setLogLevel (logLevel : LogLevel) (log : Log) =
+            { log with LogLevel = logLevel}
 module Providers =
+
+    /// WARN: This does not provide support for [MessageTemplates](https://messagetemplates.org/) so this will fail for message formats intended for structured logging.  This is only used for simple display implementations purposes only.
     module ConsoleProvider =
         open System
         open System.Globalization
@@ -265,7 +556,7 @@ module LogProvider =
         |> Option.map(fun (_, create) -> create())
     )
 
-    let  inline noopLogger _ _ _ _ = false
+    let private noopLogger _ _ _ _ = false
 
     /// **Description**
     ///
@@ -297,7 +588,19 @@ module LogProvider =
             match loggerProvider with
             | Some loggerProvider -> loggerProvider.GetLogger(``type``.ToString())
             | None -> noopLogger
+
         { new ILog with member x.Log = logFunc}
+
+
+    /// **Description**
+    ///
+    /// Creates a logger given a `'a` type.
+    ///
+    /// **Output Type**
+    ///   * `ILog`
+    ///
+    let getLoggerFor<'a> () =
+         getLogger(typedefof<'a>)
 
     /// **Description**
     ///

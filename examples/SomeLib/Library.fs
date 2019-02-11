@@ -1,8 +1,13 @@
 ﻿namespace SomeLib
+open FsLibLog
 open FsLibLog.Types
 
 module Say =
-    let logger = FsLibLog.LogProvider.getCurrentLogger()
+    let logger = LogProvider.getCurrentLogger()
+
     let hello name =
-        logger.Log LogLevel.Warn (Some (fun () -> name)) None [||]
-        |> ignore
+        logger.warn(
+            Log.setMessage ("{name} Was said hello to" )
+            >> Log.addParameters [name]
+        )
+        sprintf "hello %s" name
