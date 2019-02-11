@@ -12,5 +12,7 @@ let main argv =
 
     Say.hello "Captain" |> printfn "%A"
 
+    Say.fail "Captain"
+
     Console.ReadLine() |> ignore
     0

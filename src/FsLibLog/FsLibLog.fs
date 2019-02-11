@@ -53,7 +53,6 @@ module Types =
             /// **Output Type**
             ///   * `bool`
             member logger.fromLog (log : Log) =
-                printfn "%A" log
                 log.Parameters
                 |> List.toArray
                 |> logger.Log log.LogLevel log.Message log.Exception
