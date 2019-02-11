@@ -2,13 +2,14 @@ namespace FsLibLog
 
 module Types =
     open System
+
     type LogLevel =
-    | Trace = 0
-    | Debug = 1
-    | Info = 2
-    | Warn = 3
-    | Error = 4
-    | Fatal = 5
+        | Trace = 0
+        | Debug = 1
+        | Info = 2
+        | Warn = 3
+        | Error = 4
+        | Fatal = 5
 
     /// An optional message thunk.
     ///
@@ -20,24 +21,20 @@ module Types =
     type Logger = LogLevel -> MessageThunk -> exn option -> obj array -> bool
 
     /// Type representing a Log
-    type Log = {
-        LogLevel : LogLevel
-        Message : MessageThunk
-        Exception : exn option
-        Parameters : obj list
-    }
-        with
-            static member StartLogLevel (logLevel : LogLevel) =
-                {
-                    LogLevel = logLevel
-                    Message = None
-                    Exception = None
-                    Parameters = List.empty
-                }
+    type Log =
+        { LogLevel : LogLevel
+          Message : MessageThunk
+          Exception : exn option
+          Parameters : obj list }
+        static member StartLogLevel(logLevel : LogLevel) =
+            { LogLevel = logLevel
+              Message = None
+              Exception = None
+              Parameters = List.empty }
 
     /// An interface wrapper for `Logger`. Useful when using depedency injection frameworks.
     type ILog =
-        abstract member Log :  Logger
+        abstract Log : Logger
 
     [<AutoOpen>]
     module Inner =
@@ -53,7 +50,6 @@ module Types =
             /// **Output Type**
             ///   * `bool`
             member logger.fromLog (log : Log) =
-                printfn "%A" log
                 log.Parameters
                 |> List.toArray
                 |> logger.Log log.LogLevel log.Message log.Exception
@@ -214,15 +210,13 @@ module Types =
             member logger.trace (logConfig : Log -> Log) =
                 logger.trace' logConfig |> ignore
 
-
     /// An interface for retrieving a concrete logger such as Serilog, Nlog, etc.
     type ILogProvider =
-        abstract member GetLogger : string -> Logger
-        abstract member OpenNestedContext : string -> IDisposable
-        abstract member OpenMappedContext : string -> obj -> bool -> IDisposable
+        abstract GetLogger : string -> Logger
+        abstract OpenNestedContext : string -> IDisposable
+        abstract OpenMappedContext : string -> obj -> bool -> IDisposable
 
     module Log =
-
         /// **Description**
         ///
         /// Amends a `Log` with a message
@@ -234,7 +228,7 @@ module Types =
         /// **Output Type**
         ///   * `Log`
         let setMessage (message : string) (log : Log) =
-            { log with Message = Some (fun () -> message) }
+            { log with Message = Some(fun () -> message) }
 
         /// **Description**
         ///
@@ -282,9 +276,7 @@ module Types =
         /// **Exceptions**
         ///
         let addParameters (``params`` : 'a list) (log : Log) =
-            let ``params`` =
-                ``params``
-                |> List.map box
+            let ``params`` = ``params`` |> List.map box
             { log with Parameters = log.Parameters @ ``params`` }
 
         /// **Description**
@@ -301,8 +293,7 @@ module Types =
         /// **Exceptions**
         ///
         let addException (``exception`` : exn) (log : Log) =
-            { log with Exception = Some ``exception``}
-
+            { log with Exception = Some ``exception`` }
 
         /// **Description**
         ///
@@ -318,122 +309,171 @@ module Types =
         /// **Exceptions**
         ///
         let setLogLevel (logLevel : LogLevel) (log : Log) =
-            { log with LogLevel = logLevel}
-module Providers =
+            { log with LogLevel = logLevel }
 
+module Providers =
     /// WARN: This does not provide support for [MessageTemplates](https://messagetemplates.org/) so this will fail for message formats intended for structured logging.  This is only used for simple display implementations purposes only.
     module ConsoleProvider =
         open System
         open System.Globalization
         open Types
 
-        let isAvailable () = true
+        let isAvailable() = true
 
-        type private ConsoleProvider () =
-            let threadSafeWriter =  MailboxProcessor.Start(fun inbox ->
-                let rec loop () = async {
-                    let! (consoleColor, message : string) = inbox.Receive()
-                    let originalForground = Console.ForegroundColor
-                    try
-                        Console.ForegroundColor <- consoleColor
-                        do! Console.Out.WriteLineAsync(message) |> Async.AwaitTask
-                    finally
-                        Console.ForegroundColor <- originalForground
-                    return! loop ()
-                }
-                loop ()
-            )
+        type private ConsoleProvider() =
+
+            let threadSafeWriter =
+                MailboxProcessor.Start(fun inbox ->
+                    let rec loop() =
+                        async {
+                            let! (consoleColor, message : string) = inbox.Receive
+                                                                        ()
+                            let originalForground = Console.ForegroundColor
+                            try
+                                Console.ForegroundColor <- consoleColor
+                                do! Console.Out.WriteLineAsync(message)
+                                    |> Async.AwaitTask
+                            finally
+                                Console.ForegroundColor <- originalForground
+                            return! loop()
+                        }
+                    loop())
+
             let levelToColor =
-                Map([
-                    (LogLevel.Fatal, ConsoleColor.DarkRed)
-                    (LogLevel.Error, ConsoleColor.Red)
-                    (LogLevel.Warn, ConsoleColor.Yellow)
-                    (LogLevel.Info, ConsoleColor.White)
-                    (LogLevel.Debug, ConsoleColor.Gray)
-                    (LogLevel.Trace, ConsoleColor.DarkGray)
-                ])
-            let writeMessage name logLevel (messageFunc : MessageThunk) ``exception`` formatParams =
+                Map([ (LogLevel.Fatal, ConsoleColor.DarkRed)
+                      (LogLevel.Error, ConsoleColor.Red)
+                      (LogLevel.Warn, ConsoleColor.Yellow)
+                      (LogLevel.Info, ConsoleColor.White)
+                      (LogLevel.Debug, ConsoleColor.Gray)
+                      (LogLevel.Trace, ConsoleColor.DarkGray) ])
+
+            let writeMessage name logLevel (messageFunc : MessageThunk)
+                ``exception`` formatParams =
                 match messageFunc with
                 | None -> true
                 | Some m ->
                     let color =
-                        match levelToColor |> Map.tryFind(logLevel) with
+                        match levelToColor |> Map.tryFind (logLevel) with
                         | Some color -> color
                         | None -> Console.ForegroundColor
+
                     let formattedMsg =
-                        let msg = String.Format(CultureInfo.InvariantCulture, m (), formatParams)
+                        let msg =
+                            String.Format
+                                (CultureInfo.InvariantCulture, m(), formatParams)
+
                         let msg =
                             match ``exception`` with
-                            | Some (e : exn) ->
+                            | Some(e : exn) ->
                                 String.Format("{0} | {1}", msg, e.ToString())
-                            | None ->
-                                msg
-                        String.Format("{0} | {1} | {2} | {3}", DateTime.UtcNow, logLevel, name, msg)
+                            | None -> msg
+                        String.Format
+                            ("{0} | {1} | {2} | {3}", DateTime.UtcNow, logLevel,
+                             name, msg)
 
                     threadSafeWriter.Post(color, formattedMsg)
                     true
 
             interface ILogProvider with
-
-                member this.GetLogger(name: string): Logger =
+                member this.GetLogger(name : string) : Logger =
                     writeMessage name
-                member this.OpenMappedContext(arg1: string) (arg2: obj) (arg3: bool): System.IDisposable =
+                member this.OpenMappedContext (arg1 : string) (arg2 : obj)
+                       (arg3 : bool) : System.IDisposable =
                     failwith "Not Implemented"
-                member this.OpenNestedContext(arg1: string): System.IDisposable =
+                member this.OpenNestedContext(arg1 : string) : System.IDisposable =
                     failwith "Not Implemented"
 
-        let create () =
-            ConsoleProvider () :> ILogProvider
+        let create() = ConsoleProvider() :> ILogProvider
 
     module SerilogProvider =
         open System
         open Types
         open System.Linq.Expressions
 
-        let getLogManagerType () =
-            Type.GetType("Serilog.Log, Serilog")
-        let isAvailable () =
-            getLogManagerType () |> isNull |> not
+        let getLogManagerType() = Type.GetType("Serilog.Log, Serilog")
 
-        let getForContextMethodCall () =
-            let logManagerType = getLogManagerType ()
-            let method = logManagerType.GetMethod("ForContext", [|typedefof<string>; typedefof<obj>; typedefof<bool>|])
-            let propertyNameParam = Expression.Parameter(typedefof<string>, "propertyName")
+        let isAvailable() =
+            getLogManagerType()
+            |> isNull
+            |> not
+
+        let getForContextMethodCall() =
+            let logManagerType = getLogManagerType()
+
+            let method =
+                logManagerType.GetMethod("ForContext",
+                                         [| typedefof<string>
+                                            typedefof<obj>
+                                            typedefof<bool> |])
+
+            let propertyNameParam =
+                Expression.Parameter(typedefof<string>, "propertyName")
             let valueParam = Expression.Parameter(typedefof<obj>, "value")
-            let destructureObjectsParam = Expression.Parameter(typedefof<bool>, "destructureObjects")
-            let exrs : Expression []=
-                [|
-                    propertyNameParam
-                    valueParam
-                    destructureObjectsParam
-                |]
-            let methodCall =
-                Expression.Call(null, method, exrs)
+            let destructureObjectsParam =
+                Expression.Parameter(typedefof<bool>, "destructureObjects")
+            let exrs : Expression [] =
+                [| // (ConsoleProvider.isAvailable, ConsoleProvider.create)
+                   /// Greedy search for first available LogProvider. Order of known providers matters.
+                   /// **Description**
+                   ///
+                   /// Allows custom override when `getLogger` searches for a LogProvider.
+                   ///
+                   /// **Parameters**
+                   ///   * `provider` - parameter of type `ILogProvider`
+                   ///
+                   /// **Output Type**
+                   ///   * `unit`
+                   /// **Description**
+                   ///
+                   /// Creates a logger given a `Type`.  This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
+                   ///
+                   /// **Parameters**
+                   ///   * `type` - parameter of type `Type`
+                   ///
+                   /// **Output Type**
+                   ///   * `ILog`
+                   /// **Description**
+                   ///
+                   /// Creates a logger given a `'a` type.
+                   ///
+                   /// **Output Type**
+                   ///   * `ILog`
+                   ///
+                   /// **Description**
+                   ///
+                   /// Creates a logger. It's name is based on the current StackFrame.
+                   ///
+                   /// **Output Type**
+                   ///   * `ILog`
+                   ///
+                   propertyNameParam; valueParam; destructureObjectsParam |]
+            let methodCall = Expression.Call(null, method, exrs)
             let func =
-                Expression.Lambda<Func<string, obj, bool, obj>>(
-                    methodCall,
-                    propertyNameParam,
-                    valueParam,
-                    destructureObjectsParam).Compile()
+                Expression.Lambda<Func<string, obj, bool, obj>>(methodCall, propertyNameParam, valueParam, destructureObjectsParam)
+                    .Compile()
             fun name -> func.Invoke("SourceContext", name, false)
 
-        type SerilogGateway = {
-            Write : obj -> obj -> string -> obj [] -> unit
-            WriteException : obj -> obj -> exn -> string -> obj [] -> unit
-            IsEnabled : obj -> obj -> bool
-            TranslateLevel : LogLevel -> obj
-        } with
-            static member Create () =
-                let logEventLevelType = Type.GetType("Serilog.Events.LogEventLevel, Serilog")
+        type SerilogGateway =
+            { Write : obj -> obj -> string -> obj [] -> unit
+              WriteException : obj -> obj -> exn -> string -> obj [] -> unit
+              IsEnabled : obj -> obj -> bool
+              TranslateLevel : LogLevel -> obj }
+            static member Create() =
+                let logEventLevelType =
+                    Type.GetType("Serilog.Events.LogEventLevel, Serilog")
                 if (logEventLevelType |> isNull) then
-                    failwith ("Type Serilog.Events.LogEventLevel was not found.")
-
+                    failwith
+                        ("Type Serilog.Events.LogEventLevel was not found.")
                 let debugLevel = Enum.Parse(logEventLevelType, "Debug", false)
                 let errorLevel = Enum.Parse(logEventLevelType, "Error", false)
                 let fatalLevel = Enum.Parse(logEventLevelType, "Fatal", false)
-                let informationLevel = Enum.Parse(logEventLevelType, "Information", false)
-                let verboseLevel = Enum.Parse(logEventLevelType, "Verbose", false)
-                let warningLevel = Enum.Parse(logEventLevelType, "Warning", false)
+                let informationLevel =
+                    Enum.Parse(logEventLevelType, "Information", false)
+                let verboseLevel =
+                    Enum.Parse(logEventLevelType, "Verbose", false)
+                let warningLevel =
+                    Enum.Parse(logEventLevelType, "Warning", false)
+
                 let translateLevel (level : LogLevel) =
                     match level with
                     | LogLevel.Fatal -> fatalLevel
@@ -445,96 +485,98 @@ module Providers =
                     | _ -> debugLevel
 
                 let loggerType = Type.GetType("Serilog.ILogger, Serilog")
-                if (loggerType |> isNull) then failwith ("Type Serilog.ILogger was not found.")
-                let isEnabledMethodInfo = loggerType.GetMethod("IsEnabled", [|logEventLevelType|])
+                if (loggerType |> isNull) then
+                    failwith ("Type Serilog.ILogger was not found.")
+                let isEnabledMethodInfo =
+                    loggerType.GetMethod("IsEnabled", [| logEventLevelType |])
                 let instanceParam = Expression.Parameter(typedefof<obj>)
                 let instanceCast = Expression.Convert(instanceParam, loggerType)
                 let levelParam = Expression.Parameter(typedefof<obj>)
-                let levelCast = Expression.Convert(levelParam, logEventLevelType)
-                let isEnabledMethodCall = Expression.Call(instanceCast, isEnabledMethodInfo, levelCast)
+                let levelCast =
+                    Expression.Convert(levelParam, logEventLevelType)
+                let isEnabledMethodCall =
+                    Expression.Call
+                        (instanceCast, isEnabledMethodInfo, levelCast)
                 let isEnabled =
-                    Expression
-                        .Lambda<Func<obj, obj, bool>>(isEnabledMethodCall, instanceParam, levelParam).Compile()
+                    Expression.Lambda<Func<obj, obj, bool>>(isEnabledMethodCall, instanceParam, levelParam)
+                        .Compile()
 
                 let writeMethodInfo =
-                    loggerType.GetMethod("Write", [|logEventLevelType; typedefof<string>; typedefof<obj []>|])
+                    loggerType.GetMethod("Write",
+                                         [| logEventLevelType
+                                            typedefof<string>
+                                            typedefof<obj []> |])
+
                 let messageParam = Expression.Parameter(typedefof<string>)
-                let propertyValuesParam = Expression.Parameter(typedefof<obj []>)
+                let propertyValuesParam =
+                    Expression.Parameter(typedefof<obj []>)
                 let writeMethodExp =
-                    Expression.Call(
-                        instanceCast,
-                        writeMethodInfo,
-                        levelCast,
-                        messageParam,
-                        propertyValuesParam)
+                    Expression.Call
+                        (instanceCast, writeMethodInfo, levelCast, messageParam,
+                         propertyValuesParam)
                 let expression =
-                    Expression.Lambda<Action<obj, obj, string, obj []>>(
-                        writeMethodExp,
-                        instanceParam,
-                        levelParam,
-                        messageParam,
-                        propertyValuesParam)
+                    Expression.Lambda<Action<obj, obj, string, obj []>>
+                        (writeMethodExp, instanceParam, levelParam, messageParam,
+                         propertyValuesParam)
                 let write = expression.Compile()
 
                 let writeExceptionMethodInfo =
-                    loggerType.GetMethod(
-                        "Write",
-                        [| logEventLevelType; typedefof<exn>; typedefof<string>; typedefof<obj []>|])
+                    loggerType.GetMethod("Write",
+                                         [| logEventLevelType
+                                            typedefof<exn>
+                                            typedefof<string>
+                                            typedefof<obj []> |])
+
                 let exceptionParam = Expression.Parameter(typedefof<exn>)
                 let writeMethodExp =
-                    Expression.Call(
-                        instanceCast,
-                        writeExceptionMethodInfo,
-                        levelCast,
-                        exceptionParam,
-                        messageParam,
-                        propertyValuesParam)
+                    Expression.Call
+                        (instanceCast, writeExceptionMethodInfo, levelCast,
+                         exceptionParam, messageParam, propertyValuesParam)
                 let writeException =
-                    Expression.Lambda<Action<obj, obj, exn, string, obj []>>(
-                        writeMethodExp,
-                        instanceParam,
-                        levelParam,
-                        exceptionParam,
-                        messageParam,
-                        propertyValuesParam).Compile()
-                {
-                    Write = (fun logger level message formattedParmeters -> write.Invoke(logger,level,message,formattedParmeters))
-                    WriteException = fun logger level ex message formattedParmeters -> writeException.Invoke(logger,level,ex,message,formattedParmeters)
-                    IsEnabled = fun logger level -> isEnabled.Invoke(logger,level)
-                    TranslateLevel = translateLevel
-                }
+                    Expression.Lambda<Action<obj, obj, exn, string, obj []>>(writeMethodExp, instanceParam, levelParam, exceptionParam, messageParam, propertyValuesParam)
+                        .Compile()
+                { Write =
+                      (fun logger level message formattedParmeters ->
+                      write.Invoke(logger, level, message, formattedParmeters))
+                  WriteException =
+                      fun logger level ex message formattedParmeters ->
+                          writeException.Invoke
+                              (logger, level, ex, message, formattedParmeters)
+                  IsEnabled =
+                      fun logger level -> isEnabled.Invoke(logger, level)
+                  TranslateLevel = translateLevel }
 
-        type private SerigLogProvider () =
-            let getLoggerByName = getForContextMethodCall ()
-            let serilogGatewayInit = lazy(SerilogGateway.Create())
+        type private SerigLogProvider() =
+            let getLoggerByName = getForContextMethodCall()
+            let serilogGatewayInit = lazy (SerilogGateway.Create())
 
-            let writeMessage logger logLevel (messageFunc : MessageThunk) ``exception`` formatParams =
+            let writeMessage logger logLevel (messageFunc : MessageThunk)
+                ``exception`` formatParams =
                 let serilogGateway = serilogGatewayInit.Value
                 let translatedValue = serilogGateway.TranslateLevel logLevel
                 match messageFunc with
                 | None -> serilogGateway.IsEnabled logger translatedValue
-                | Some _ when  serilogGateway.IsEnabled logger translatedValue |> not -> false
+                | Some _ when serilogGateway.IsEnabled logger translatedValue
+                              |> not -> false
                 | Some m ->
                     match ``exception`` with
                     | Some ex ->
-                        serilogGateway.WriteException logger translatedValue ex (m()) formatParams
+                        serilogGateway.WriteException logger translatedValue ex
+                            (m()) formatParams
                     | None ->
-                        serilogGateway.Write logger translatedValue (m()) formatParams
+                        serilogGateway.Write logger translatedValue (m())
+                            formatParams
                     true
 
             interface ILogProvider with
-                member this.GetLogger(name: string): Logger =
-                    getLoggerByName name
-                    |> writeMessage
-                member this.OpenMappedContext(arg1: string) (arg2: obj) (arg3: bool): IDisposable =
+                member this.GetLogger(name : string) : Logger =
+                    getLoggerByName name |> writeMessage
+                member this.OpenMappedContext (arg1 : string) (arg2 : obj)
+                       (arg3 : bool) : IDisposable = failwith "Not Implemented"
+                member this.OpenNestedContext(arg1 : string) : IDisposable =
                     failwith "Not Implemented"
-                member this.OpenNestedContext(arg1: string): IDisposable =
-                    failwith "Not Implemented"
 
-        let create () =
-            SerigLogProvider () :> ILogProvider
-
-
+        let create() = SerigLogProvider() :> ILogProvider
 
 module LogProvider =
     open System
@@ -543,72 +585,36 @@ module LogProvider =
     open System.Diagnostics
 
     let mutable private currentLogProvider = None
+    let private knownProviders =
+        [ (SerilogProvider.isAvailable, SerilogProvider.create) ]
 
-    let private knownProviders = [
-        (SerilogProvider.isAvailable , SerilogProvider.create)
-        // (ConsoleProvider.isAvailable, ConsoleProvider.create)
-    ]
-
-    /// Greedy search for first available LogProvider. Order of known providers matters.
-    let private resolvedLogger = lazy (
-        knownProviders
-        |> Seq.tryFind(fun (isAvailable,_) -> isAvailable ())
-        |> Option.map(fun (_, create) -> create())
-    )
+    let private resolvedLogger =
+        lazy (knownProviders
+              |> Seq.tryFind (fun (isAvailable, _) -> isAvailable())
+              |> Option.map (fun (_, create) -> create()))
 
     let private noopLogger _ _ _ _ = false
 
-    /// **Description**
-    ///
-    /// Allows custom override when `getLogger` searches for a LogProvider.
-    ///
-    /// **Parameters**
-    ///   * `provider` - parameter of type `ILogProvider`
-    ///
-    /// **Output Type**
-    ///   * `unit`
     let setLoggerProvider (logProvider : ILogProvider) =
         currentLogProvider <- Some logProvider
 
-    /// **Description**
-    ///
-    /// Creates a logger given a `Type`.  This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
-    ///
-    /// **Parameters**
-    ///   * `type` - parameter of type `Type`
-    ///
-    /// **Output Type**
-    ///   * `ILog`
     let getLogger (``type`` : Type) =
         let loggerProvider =
             match currentLogProvider with
             | None -> resolvedLogger.Value
             | Some p -> Some p
+
         let logFunc =
             match loggerProvider with
-            | Some loggerProvider -> loggerProvider.GetLogger(``type``.ToString())
+            | Some loggerProvider ->
+                loggerProvider.GetLogger(``type``.ToString())
             | None -> noopLogger
 
-        { new ILog with member x.Log = logFunc}
+        { new ILog with
+              member x.Log = logFunc }
 
+    let getLoggerFor<'a>() = getLogger (typedefof<'a>)
 
-    /// **Description**
-    ///
-    /// Creates a logger given a `'a` type.
-    ///
-    /// **Output Type**
-    ///   * `ILog`
-    ///
-    let getLoggerFor<'a> () =
-         getLogger(typedefof<'a>)
-
-    /// **Description**
-    ///
-    /// Creates a logger. It's name is based on the current StackFrame.
-    ///
-    /// **Output Type**
-    ///   * `ILog`
-    ///
-    let getCurrentLogger ()   =
+    let getCurrentLogger() =
         let stackFrame = StackFrame(2, false)
-        getLogger(stackFrame.GetMethod().DeclaringType)
+        getLogger (stackFrame.GetMethod().DeclaringType)

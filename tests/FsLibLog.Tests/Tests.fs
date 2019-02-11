@@ -1,10 +1,8 @@
 module Tests
 
-
 open Expecto
 open FsLibLog
 open FsLibLog.Types
-
 // [<Tests>]
 // let tests =
 //   testList "samples" [
@@ -13,4 +11,3 @@ open FsLibLog.Types
 //         let p = logger.Log LogLevel.Warn (Some(fun () -> "Foobar")) None [||]
 //         Expect.isTrue p "Message sent"
 //     ]
-
