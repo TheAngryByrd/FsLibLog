@@ -80,7 +80,7 @@ The set of functions to augment the `Log` record are
 - `Log.setMessage` - Amends a `Log` with a message
 - `Log.setMessageThunk` - Amends a `Log` with a message thunk.  Useful for "expensive" string construction scenarios.
 - `Log.addParameter` - Amends a `Log` with a parameter.
-- `Log.addParameter` - Amends a `Log` with a list of parameters.
+- `Log.addParameters` - Amends a `Log` with a list of parameters.
 - `Log.addException` - Amends a `Log` with an exception.
 
 
