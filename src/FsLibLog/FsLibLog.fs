@@ -265,7 +265,7 @@ module Types =
         /// **Exceptions**
         ///
         let addParameter (param : 'a) (log : Log) =
-            { log with Parameters = (box param) :: log.Parameters }
+            { log with Parameters = log.Parameters |> List.append [(box param)] }
 
         /// **Description**
         ///
