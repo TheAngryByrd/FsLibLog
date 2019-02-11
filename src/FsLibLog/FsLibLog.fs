@@ -185,8 +185,6 @@ module Providers =
                         propertyValuesParam)
                 let write = expression.Compile()
 
-                // // Action<object, object, string, Exception> WriteException =
-                // // (logger, level, exception, message) => { ((ILogger)logger).Write(level, exception, message, new object[]); }
                 let writeExceptionMethodInfo =
                     loggerType.GetMethod(
                         "Write",
@@ -235,9 +233,8 @@ module Providers =
 
             interface ILogProvider with
                 member this.GetLogger(name: string): Logger =
-                    let logger =  getLoggerByName (name)
-                    printfn "%A" logger
-                    writeMessage logger
+                    getLoggerByName name
+                    |> writeMessage
                 member this.OpenMappedContext(arg1: string) (arg2: obj) (arg3: bool): IDisposable =
                     failwith "Not Implemented"
                 member this.OpenNestedContext(arg1: string): IDisposable =
