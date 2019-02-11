@@ -237,7 +237,7 @@ module Types =
 
         /// **Description**
         ///
-        /// Amends a `Log` with a message thunk
+        /// Amends a `Log` with a message thunk.  Useful for "expensive" string construction scenarios.
         ///
         /// **Parameters**
         ///   * `messageThunk` - parameter of type `unit -> string`
@@ -253,7 +253,7 @@ module Types =
 
         /// **Description**
         ///
-        /// Amends a `Log` with a parameter
+        /// Amends a `Log` with a parameter.
         ///
         /// **Parameters**
         ///   * `param` - parameter of type `'a`
@@ -269,7 +269,7 @@ module Types =
 
         /// **Description**
         ///
-        /// Amends a `Log` with a list of parameters
+        /// Amends a `Log` with a list of parameters.
         ///
         /// **Parameters**
         ///   * `params` - parameter of type `'a list`
@@ -288,7 +288,7 @@ module Types =
 
         /// **Description**
         ///
-        /// Amends a `Log` with an `exn`
+        /// Amends a `Log` with an `exn`.
         ///
         /// **Parameters**
         ///   * `exception` - parameter of type `exn`
@@ -302,6 +302,21 @@ module Types =
         let addException (``exception`` : exn) (log : Log) =
             { log with Exception = Some ``exception``}
 
+        /// **Description**
+        ///
+        /// Amends a `Log` with an `exn`.
+        ///
+        /// **Parameters**
+        ///   * `exception` - parameter of type `exn`
+        ///   * `log` - parameter of type `Log`
+        ///
+        /// **Output Type**
+        ///   * `Log`
+        ///
+        /// **Exceptions**
+        ///
+        let addExn (``exception`` : exn) (log : Log) =
+            addException ``exception`` log
 
         /// **Description**
         ///

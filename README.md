@@ -44,23 +44,74 @@ Target.create "Replace" <| fun _ ->
 
 ## Using in your library
 
-Example:
+### Open namespaces 
+
+```fsharp
+open FsLibLog
+open FsLibLog.Types
+```
+
+### Get a logger
+
+There are currently three ways to get a logger.
+
+- `getCurrentLogger` - Creates a logger. It's name is based on the current StackFrame.
+- `getLoggerFor` - Creates a logger given a `'a` type.
+- `getLogger` - Creates a logger given a `Type`.
+
+
+### Set the loglevel, message, exception and parameters
+
+Choose a LogLevel. (Fatal|Error|Warn|Info|Debug|Trace).
+
+There are helper methods on the logger instance, such as `logger.warn`.
+
+These helper functions take a `(Log -> Log)` which allows you to amend the log record easily with functions in the `Log` module.  You can use function composition to set the fields much easier.
+
+```fsharp
+logger.warn(
+    Log.setMessage "{name} Was said hello to"
+    >> Log.addParameter name
+)
+```
+
+The set of functions to augment the `Log` record are
+
+- `Log.setMessage` - Amends a `Log` with a message
+- `Log.setMessageThunk` - Amends a `Log` with a message thunk.  Useful for "expensive" string construction scenarios.
+- `Log.addParameter` - Amends a `Log` with a parameter.
+- `Log.addParameter` - Amends a `Log` with a list of parameters.
+- `Log.addException` - Amends a `Log` with an exception.
+
+
+
+### Full Example:
 
 ```fsharp
 namespace SomeLib
 open FsLibLog
 open FsLibLog.Types
 
+
 module Say =
     let logger = LogProvider.getCurrentLogger()
 
-    let hello name =
+    let hello name  =
         logger.warn(
-            Log.setMessage ("{name} Was said hello to" )
-            >> Log.addParameters [name]
+            Log.setMessage "{name} Was said hello to"
+            >> Log.addParameter name
         )
-        sprintf "hello %s" name
+        sprintf "hello %s." name
 
+    let fail name =
+        try
+            failwithf "Sorry %s isnt valid" name
+        with e ->
+            logger.error(
+                Log.setMessage "{name} was rejected."
+                >> Log.addParameter name
+                >> Log.addException  e
+            )
 ```
 
 
