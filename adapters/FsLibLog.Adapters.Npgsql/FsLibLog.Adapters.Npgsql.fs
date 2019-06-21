@@ -31,9 +31,9 @@ type FsLibLogLogger (logger :  FsLibLog.Types.ILog) =
                 level
                 |> mapLogLevels
                 |> Log.StartLogLevel
-            let message = "{connectorId} : {message}"
+            let format = "{connectorId} : {message}"
             let logConfig =
-                Log.setMessage message
+                Log.setMessage format
                 >> Log.addParameter connectorId
                 >> Log.addParameter message
                 >> Log.addException ex

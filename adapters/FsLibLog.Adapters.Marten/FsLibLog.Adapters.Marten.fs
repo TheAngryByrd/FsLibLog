@@ -8,7 +8,32 @@ open Npgsql
 open System.Linq
 open System.Collections.Generic
 
-type FsLibLogLogger (logger :  FsLibLog.Types.ILog) =
+type FsLibLogLogger (logger :  FsLibLog.Types.ILog, ?shouldLogParameters : bool) =
+    let shouldLogParameters = defaultArg shouldLogParameters false
+    let format =
+        if shouldLogParameters then
+            "{CommandText} - {parameters}"
+        else
+            "{CommandText}"
+
+    let logCommand logF (command : NpgsqlCommand) (ex : exn) =
+        let logParams =
+            if shouldLogParameters then
+                let parameters = Dictionary<string,obj>()
+                command.Parameters
+                |> Seq.iter(fun p ->
+                    parameters.Add(p.ParameterName, p.Value)
+                )
+                Log.addParameter parameters
+            else
+                id
+        logF(
+            Log.setMessage format
+            >> Log.addParameter command.CommandText
+            >> logParams
+            >> Log.addException ex
+        )
+
     new () =  FsLibLogLogger (LogProvider.getLoggerByName "Marten")
     interface IMartenLogger with
         member this.StartSession(_session : IQuerySession) : IMartenSessionLogger = this :> IMartenSessionLogger
@@ -20,29 +45,12 @@ type FsLibLogLogger (logger :  FsLibLog.Types.ILog) =
 
     interface IMartenSessionLogger with
         member __.LogSuccess(command:NpgsqlCommand) =
-            let parameters = Dictionary<string,obj>()
-            command.Parameters
-            |> Seq.iter(fun p ->
-                parameters.Add(p.ParameterName, p.Value)
-            )
-            logger.debug(
-                Log.setMessage "Success: {CommandText} - {parameters}"
-                >> Log.addParameter command.CommandText
-                >> Log.addParameter parameters
-            )
+            logCommand logger.debug command null
+
 
         member __.LogFailure(command:NpgsqlCommand, ex : exn) =
-            let parameters = Dictionary<string,obj>()
-            command.Parameters
-            |> Seq.iter(fun p ->
-                parameters.Add(p.ParameterName, p.Value)
-            )
-            logger.error(
-                Log.setMessage "Failure: {CommandText} - {parameters}"
-                >> Log.addParameter command.CommandText
-                >> Log.addParameter parameters
-                >> Log.addException ex
-            )
+
+            logCommand logger.debug command ex
 
         member __.RecordSavedChanges(_session: IDocumentSession, commit : IChangeSet) =
             logger.debug(

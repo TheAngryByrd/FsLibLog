@@ -265,7 +265,7 @@ module Types =
         /// **Exceptions**
         ///
         let addParameter (param : 'a) (log : Log) =
-            { log with Parameters = log.Parameters |> List.append [(box param)] }
+            { log with Parameters = List.append log.Parameters [(box param)] }
 
         /// **Description**
         ///
@@ -288,7 +288,7 @@ module Types =
 
         /// **Description**
         ///
-        /// Amends a `Log` with an `exn`.
+        /// Amends a `Log` with an `exn`. Handles nulls.
         ///
         /// **Parameters**
         ///   * `exception` - parameter of type `exn`
@@ -304,7 +304,7 @@ module Types =
 
         /// **Description**
         ///
-        /// Amends a `Log` with an `exn`.
+        /// Amends a `Log` with an `exn`.  Handles nulls.
         ///
         /// **Parameters**
         ///   * `exception` - parameter of type `exn`
