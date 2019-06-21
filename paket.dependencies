@@ -13,6 +13,7 @@ nuget Microsoft.NET.Test.Sdk 15.7.2
 nuget altcover 4.0.603
 
 nuget NpgSql
+nuget Marten
 
 // [ FAKE GROUP ]
 group Build

@@ -25,16 +25,17 @@ type FsLibLogLogger (logger :  FsLibLog.Types.ILog) =
         override __.Log
             (   level : NpgsqlLogLevel,
                 connectorId : int,
-                msg : string,
+                message : string,
                 ex : exn) =
             let log =
                 level
                 |> mapLogLevels
                 |> Log.StartLogLevel
-            let message = sprintf "{connectorId} : %s" msg
+            let message = "{connectorId} : {message}"
             let logConfig =
                 Log.setMessage message
                 >> Log.addParameter connectorId
+                >> Log.addParameter message
                 >> Log.addException ex
             log
             |> logConfig
