@@ -12,6 +12,8 @@ nuget YoloDev.Expecto.TestSdk 0.7.0
 nuget Microsoft.NET.Test.Sdk 15.7.2
 nuget altcover 4.0.603
 
+nuget NpgSql
+
 // [ FAKE GROUP ]
 group Build
 
