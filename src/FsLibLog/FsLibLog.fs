@@ -300,7 +300,7 @@ module Types =
         /// **Exceptions**
         ///
         let addException (``exception`` : exn) (log : Log) =
-            { log with Exception = Some ``exception``}
+            { log with Exception = Option.ofObj ``exception``}
 
         /// **Description**
         ///
@@ -586,6 +586,27 @@ module LogProvider =
 
     /// **Description**
     ///
+    /// Creates a logger given a `string`.  This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
+    ///
+    /// **Parameters**
+    ///   * `string` - parameter of type `string`
+    ///
+    /// **Output Type**
+    ///   * `ILog`
+    let getLoggerByName (name : string) =
+        let loggerProvider =
+            match currentLogProvider with
+            | None -> resolvedLogger.Value
+            | Some p -> Some p
+        let logFunc =
+            match loggerProvider with
+            | Some loggerProvider -> loggerProvider.GetLogger(name)
+            | None -> noopLogger
+
+        { new ILog with member x.Log = logFunc}
+
+    /// **Description**
+    ///
     /// Creates a logger given a `Type`.  This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
     ///
     /// **Parameters**
@@ -593,36 +614,29 @@ module LogProvider =
     ///
     /// **Output Type**
     ///   * `ILog`
-    let getLogger (``type`` : Type) =
-        let loggerProvider =
-            match currentLogProvider with
-            | None -> resolvedLogger.Value
-            | Some p -> Some p
-        let logFunc =
-            match loggerProvider with
-            | Some loggerProvider -> loggerProvider.GetLogger(``type``.ToString())
-            | None -> noopLogger
-
-        { new ILog with member x.Log = logFunc}
-
+    let getLoggerByType (``type`` : Type) =
+        ``type``
+        |> string
+        |> getLoggerByName
 
     /// **Description**
     ///
-    /// Creates a logger given a `'a` type.
+    /// Creates a logger given a `'a` type. This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
     ///
     /// **Output Type**
     ///   * `ILog`
     ///
     let getLoggerFor<'a> () =
-         getLogger(typedefof<'a>)
+        getLoggerByType(typedefof<'a>)
 
     /// **Description**
     ///
-    /// Creates a logger. It's name is based on the current StackFrame.
+    /// Creates a logger. It's name is based on the current StackFrame. This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
+    /// WARNING: This has inconsisent results.
     ///
     /// **Output Type**
     ///   * `ILog`
     ///
     let getCurrentLogger ()   =
         let stackFrame = StackFrame(2, false)
-        getLogger(stackFrame.GetMethod().DeclaringType)
+        getLoggerByType(stackFrame.GetMethod().DeclaringType)
