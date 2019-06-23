@@ -602,6 +602,11 @@ module LogProvider =
 
     let private noopLogger _ _ _ _ = false
 
+    let private noopDisposable = {
+        new IDisposable with
+            member __.Dispose() = ()
+    }
+
     /// **Description**
     ///
     /// Allows custom override when `getLogger` searches for a LogProvider.
@@ -614,6 +619,11 @@ module LogProvider =
     let setLoggerProvider (logProvider : ILogProvider) =
         currentLogProvider <- Some logProvider
 
+    let getCurrentLogProvider () =
+        match currentLogProvider with
+        | None -> resolvedLogger.Value
+        | Some p -> Some p
+
     /// **Description**
     ///
     /// Creates a logger given a `string`.  This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
@@ -624,10 +634,8 @@ module LogProvider =
     /// **Output Type**
     ///   * `ILog`
     let getLoggerByName (name : string) =
-        let loggerProvider =
-            match currentLogProvider with
-            | None -> resolvedLogger.Value
-            | Some p -> Some p
+        let loggerProvider = getCurrentLogProvider ()
+
         let logFunc =
             match loggerProvider with
             | Some loggerProvider -> loggerProvider.GetLogger(name)
@@ -670,3 +678,57 @@ module LogProvider =
     let getCurrentLogger ()   =
         let stackFrame = StackFrame(2, false)
         getLoggerByType(stackFrame.GetMethod().DeclaringType)
+
+// destructureObjects: If true, and the value is a non-primitive, non-array type, then the value will be converted to a structure; otherwise, unknown types will be converted to scalars, which are generally stored as strings.
+// name: The name of the property.
+// value: The value of the property.
+
+    /// **Description**
+    ///
+    /// Opens a mapped diagnostic context.  This will allow you to set additional parameters to a log given a scope.
+    ///
+    /// **Parameters**
+    ///   * `key` - parameter of type `string` - The name of the property.
+    ///   * `value` - parameter of type `obj` - The value of the property.
+    ///   * `destructureObjects` - parameter of type `bool` - If true, and the value is a non-primitive, non-array type, then the value will be converted to a structure; otherwise, unknown types will be converted to scalars, which are generally stored as strings.
+    ///
+    /// **Output Type**
+    ///   * `IDisposable`
+    let openMappedContextDestucturable (key : string) (value : obj) (destructureObjects : bool)=
+        let provider  = getCurrentLogProvider ()
+        match provider with
+        | Some p ->
+            p.OpenMappedContext key value destructureObjects
+        | None ->
+            noopDisposable
+
+    /// **Description**
+    ///
+    /// Opens a mapped diagnostic context.  This will allow you to set additional parameters to a log given a scope. Sets destructureObjects to false.
+    ///
+    /// **Parameters**
+    ///   * `key` - parameter of type `string` - The name of the property.
+    ///   * `value` - parameter of type `obj` - The value of the property.
+    ///
+    /// **Output Type**
+    ///   * `IDisposable`
+    let openMappedContext (key : string) (value : obj) =
+        //TODO: We should try to find out if the value is a primitive
+        openMappedContextDestucturable key value false
+
+    /// **Description**
+    ///
+    /// Opens a nested diagnostic context.  This will allow you to set additional parameters to a log given a scope.
+    ///
+    /// **Parameters**
+    ///   * `value` - parameter of type `string` - The value of the property.
+    ///
+    /// **Output Type**
+    ///   * `IDisposable`
+    let openNextedContext (value : string) =
+        let provider  = getCurrentLogProvider ()
+        match provider with
+        | Some p ->
+            p.OpenNestedContext value
+        | None ->
+            noopDisposable
