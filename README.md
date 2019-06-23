@@ -57,7 +57,8 @@ There are currently three ways to get a logger.
 
 - `getCurrentLogger` - Creates a logger. It's name is based on the current StackFrame.
 - `getLoggerFor` - Creates a logger given a `'a` type.
-- `getLogger` - Creates a logger given a `Type`.
+- `getLoggerByType` - Creates a logger given a `Type`.
+- `getLoggerByName` - Creates a logger given a `string`.
 
 
 ### Set the loglevel, message, exception and parameters
