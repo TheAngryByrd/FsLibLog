@@ -9,6 +9,9 @@ module Say =
         Name : string
     }
 
+
+    // Example Log Output:
+    // 16:23 [Information] <SomeLib.Say> () "Captain" Was said hello to - {"UserContext": {"Name": "User123", "$type": "AdditionalData"}, "FunctionName": "hello"}
     let hello name  =
         // Starts the log out as an Informational log
         logger.info(
@@ -24,6 +27,10 @@ module Say =
         )
         sprintf "hello %s." name
 
+
+    // Example Log Output:
+    // 16:23 [Debug] <SomeLib.Say> () In nested - {"DestructureTrue": {"Name": "Additional", "$type": "AdditionalData"}, "DestructureFalse": "{Name = \"Additional\";}", "Value": "bar"}
+    // [Information] <SomeLib.Say> () "Commander" Was said hello to - {"UserContext": {"Name": "User123", "$type": "AdditionalData"}, "FunctionName": "hello", "DestructureTrue": {"Name": "Additional", "$type": "AdditionalData"}, "DestructureFalse": "{Name = \"Additional\";}", "Value": "bar"}
     let nestedHello name =
         // This sets additional context to any log within scope
         // This is useful if you want to add this to all logs within this given scope
@@ -36,10 +43,15 @@ module Say =
         logger.debug(
             Log.setMessage "In nested"
         )
-        // The log in `hello`  should also have these additional contexts added
+        // The log in `hello` should also have these additional contexts added
         hello name
 
 
+    // Example Log Output:
+    // 16:23 [Error] <SomeLib.Say> () "DaiMon" was rejected. - {}
+    // System.Exception: Sorry DaiMon isnt valid
+    //    at Microsoft.FSharp.Core.PrintfModule.PrintFormatToStringThenFail@1647.Invoke(String message)
+    //    at SomeLib.Say.fail(String name) in /Users/jimmybyrd/Documents/GitHub/FsLibLog/examples/SomeLib/Library.fs:line 57
     let fail name =
         try
             failwithf "Sorry %s isnt valid" name

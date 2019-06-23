@@ -49,9 +49,13 @@ module rec Types =
         type DisposableList (disposables : IDisposable list) =
             interface IDisposable with
                 member __.Dispose () =
-                    disposables |> List.iter(fun d -> d.Dispose())
+                    printfn "disposing %d" (disposables |> Seq.length)
+                    disposables |> List.iter(fun d -> try d.Dispose() with e -> printfn "%A" e)
             static member Create (disposables : IDisposable list) = new DisposableList(disposables)
-
+        let private noopDisposable = {
+            new IDisposable with
+                member __.Dispose() = ()
+        }
         type ILog with
 
             /// **Description**
@@ -64,10 +68,21 @@ module rec Types =
             /// **Output Type**
             ///   * `bool`
             member logger.fromLog (log : Log) =
+
+                //TODO: Dig deeper
+                // For someone I cannot get Serilog to cooperate. If I don't do an initial MappedContext here, it will keep additional
+                // data around in other LogProviders even though I am disposing of them.
+                // Luckily override the same parameter doesn't do anything other than a perf hit so I'd rather be correct.
                 use __ =
+                    match log.AdditionalNamedParameters |> List.tryHead |> Option.map(fun (k,v,d) -> logger.MappedContext k v d) with
+                    | Some p -> p
+                    | None -> noopDisposable
+
+                let __ =
                     log.AdditionalNamedParameters
                     |> List.map(fun (key,value, destructure) -> logger.MappedContext key value destructure)
                     |> DisposableList.Create
+
                 log.Parameters
                 |> List.toArray
                 |> logger.Log log.LogLevel log.Message log.Exception
