@@ -409,6 +409,35 @@ module Providers =
         let isAvailable () =
             getLogManagerType () |> isNull |> not
 
+        let getPushProperty () =
+
+            let ndcContextType =
+                Type.GetType("Serilog.Context.LogContext, Serilog")
+                |> Option.ofObj
+                |> Option.defaultWith (fun () -> Type.GetType("Serilog.Context.LogContext, Serilog.FullNetFx"))
+
+            ()
+            let pushPropertyMethod =
+                ndcContextType.GetMethod( "PushProperty",
+                    [|typedefof<string>; typedefof<obj>; typedefof<bool>|])
+
+            let nameParam = Expression.Parameter(typedefof<string>, "name")
+            let valueParam = Expression.Parameter(typedefof<obj>, "value")
+            let destructureObjectParam = Expression.Parameter(typedefof<bool>, "destructureObjects");
+            let pushPropertyMethodCall =
+                Expression.Call(null, pushPropertyMethod, nameParam, valueParam, destructureObjectParam);
+            let pushProperty =
+                Expression
+                    .Lambda<Func<string, obj, bool, IDisposable>>(
+                        pushPropertyMethodCall,
+                        nameParam,
+                        valueParam,
+                        destructureObjectParam)
+                    .Compile();
+
+            fun key value destructure -> pushProperty.Invoke(key, value, destructure)
+
+
         let getForContextMethodCall () =
             let logManagerType = getLogManagerType ()
             let method = logManagerType.GetMethod("ForContext", [|typedefof<string>; typedefof<obj>; typedefof<bool>|])
@@ -520,6 +549,7 @@ module Providers =
 
         type private SerigLogProvider () =
             let getLoggerByName = getForContextMethodCall ()
+            let pushProperty = getPushProperty()
             let serilogGatewayInit = lazy(SerilogGateway.Create())
 
             let writeMessage logger logLevel (messageFunc : MessageThunk) ``exception`` formatParams =
@@ -540,10 +570,10 @@ module Providers =
                 member this.GetLogger(name: string): Logger =
                     getLoggerByName name
                     |> writeMessage
-                member this.OpenMappedContext(arg1: string) (arg2: obj) (arg3: bool): IDisposable =
-                    failwith "Not Implemented"
-                member this.OpenNestedContext(arg1: string): IDisposable =
-                    failwith "Not Implemented"
+                member this.OpenMappedContext(key: string) (value: obj) (destructure: bool): IDisposable =
+                    pushProperty key value destructure
+                member this.OpenNestedContext(message: string): IDisposable =
+                    pushProperty "NDC" message false
 
         let create () =
             SerigLogProvider () :> ILogProvider
