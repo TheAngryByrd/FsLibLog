@@ -328,6 +328,8 @@ module rec Types =
         /// Amends a `Log` with additional named parameters for context. This helper adds more context to a log.
         /// This DOES NOT affect the parameters set for a message template.
         /// This is the same calling OpenMappedContext right before logging.
+        /// This destructures an object rather than calling `ToString()` on it.
+        /// WARNING: Destructring can be expensive.
         ///
         /// **Parameters**
         ///   * `key` - parameter of type `string`
@@ -688,7 +690,7 @@ module LogProvider =
     /// **Parameters**
     ///   * `key` - parameter of type `string` - The name of the property.
     ///   * `value` - parameter of type `obj` - The value of the property.
-    ///   * `destructureObjects` - parameter of type `bool` - If true, and the value is a non-primitive, non-array type, then the value will be converted to a structure; otherwise, unknown types will be converted to scalars, which are generally stored as strings.
+    ///   * `destructureObjects` - parameter of type `bool` - If true, and the value is a non-primitive, non-array type, then the value will be converted to a structure; otherwise, unknown types will be converted to scalars, which are generally stored as strings. WARNING: Destructring can be expensive.
     ///
     /// **Output Type**
     ///   * `IDisposable`

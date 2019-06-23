@@ -15,8 +15,9 @@ let main argv =
 
     Say.hello "Captain" |> printfn "%A"
 
+    Say.nestedHello "Commander" |> printfn "%A"
 
-    Say.fail "Captain"
+    Say.fail "DaiMon"
 
     Console.ReadLine() |> ignore
     0
