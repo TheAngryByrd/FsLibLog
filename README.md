@@ -83,7 +83,7 @@ The set of functions to augment the `Log` record are
 - `Log.addParameter` - Amends a `Log` with a parameter.
 - `Log.addParameters` - Amends a `Log` with a list of parameters.
 - `Log.addContext` - Amends a `Log` with additional named parameters for context. This helper adds more context to a log.  This DOES NOT affect the parameters set for a message template. This is the same calling OpenMappedContext right before logging.
-- `Log.addContext` - Amends a `Log` with additional named parameters for context. This helper adds more context to a log. This DOES NOT affect the parameters set for a message template. This is the same calling OpenMappedContext right before logging. This destructures an object rather than calling `ToString()` on it.  WARNING: Destructring can be expensive
+- `Log.addContextDestructured` - Amends a `Log` with additional named parameters for context. This helper adds more context to a log. This DOES NOT affect the parameters set for a message template. This is the same calling OpenMappedContext right before logging. This destructures an object rather than calling `ToString()` on it.  WARNING: Destructring can be expensive
 - `Log.addException` - Amends a `Log` with an exception.
 
 
