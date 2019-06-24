@@ -783,7 +783,7 @@ module LogProvider =
     ///   * `ILog`
     ///
     let getLoggerFor<'a> () =
-        getLoggerByType(typedefof<'a>)
+        getLoggerByType(typeof<'a>)
 
     /// **Description**
     ///
