@@ -49,8 +49,7 @@ type FsLibLogLogger (logger :  FsLibLog.Types.ILog, ?shouldLogParameters : bool)
 
 
         member __.LogFailure(command:NpgsqlCommand, ex : exn) =
-
-            logCommand logger.debug command ex
+            logCommand logger.error command ex
 
         member __.RecordSavedChanges(_session: IDocumentSession, commit : IChangeSet) =
             logger.debug(
