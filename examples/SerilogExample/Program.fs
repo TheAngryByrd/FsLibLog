@@ -8,8 +8,8 @@ let main argv =
     let log =
         LoggerConfiguration()
             .MinimumLevel.Verbose()
-            .WriteTo.ColoredConsole(outputTemplate= "{Timestamp:HH:mm} [{Level}] <{SourceContext}> ({Name:l}) {Message:j} - {Properties:j}{NewLine}{Exception}{NewLine}")
-            .Enrich.FromLogContext()
+            .WriteTo.ColoredConsole(outputTemplate= "{Timestamp:HH:mm} [{Level}] <{SourceContext}> ({Name:l}) {Message:j} - {Properties:j}{NewLine}{Exception}")
+            .Enrich.FromLogContext() //Necessary if you want to use MappedContext
             .CreateLogger();
     Log.Logger <- log
 

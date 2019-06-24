@@ -49,8 +49,8 @@ module rec Types =
         type DisposableList (disposables : IDisposable list) =
             interface IDisposable with
                 member __.Dispose () =
-                    printfn "disposing %d" (disposables |> Seq.length)
                     disposables |> List.iter(fun d -> try d.Dispose() with e -> printfn "%A" e)
+
             static member Create (disposables : IDisposable list) = new DisposableList(disposables)
         let private noopDisposable = {
             new IDisposable with
@@ -68,19 +68,10 @@ module rec Types =
             /// **Output Type**
             ///   * `bool`
             member logger.fromLog (log : Log) =
-
-                //TODO: Dig deeper
-                // For someone I cannot get Serilog to cooperate. If I don't do an initial MappedContext here, it will keep additional
-                // data around in other LogProviders even though I am disposing of them.
-                // Luckily override the same parameter doesn't do anything other than a perf hit so I'd rather be correct.
                 use __ =
-                    match log.AdditionalNamedParameters |> List.tryHead |> Option.map(fun (k,v,d) -> logger.MappedContext k v d) with
-                    | Some p -> p
-                    | None -> noopDisposable
-
-                let __ =
                     log.AdditionalNamedParameters
                     |> List.map(fun (key,value, destructure) -> logger.MappedContext key value destructure)
+                    |> List.rev // This reverse is important, it causes us to unwind as if you have multiple uses in a row
                     |> DisposableList.Create
 
                 log.Parameters
@@ -709,7 +700,7 @@ module LogProvider =
     ///
     /// **Output Type**
     ///   * `IDisposable`
-    let openMappedContextDestucturable (key : string) (value : obj) (destructureObjects : bool)=
+    let openMappedContextDestucturable (key : string) (value : obj) (destructureObjects : bool) =
         let provider  = getCurrentLogProvider ()
         match provider with
         | Some p ->
