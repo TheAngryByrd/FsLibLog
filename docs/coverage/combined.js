@@ -325,9 +325,9 @@ var assemblies = [
   {
     "name": "FsLibLog",
     "classes": [
-      { "name": "FsLibLog.LogProvider", "reportPath": "FsLibLog_LogProvider.htm", "coveredLines": 0, "uncoveredLines": 14, "coverableLines": 14, "totalLines": 628, "coverageType": "LineCoverage", "methodCoverage": "-", "coveredBranches": 0, "totalBranches": 4, "lineCoverageHistory": [], "branchCoverageHistory": [], "historicCoverages": [] },
-      { "name": "FsLibLog.Providers", "reportPath": "FsLibLog_Providers.htm", "coveredLines": 0, "uncoveredLines": 131, "coverableLines": 131, "totalLines": 628, "coverageType": "LineCoverage", "methodCoverage": "-", "coveredBranches": 0, "totalBranches": 4, "lineCoverageHistory": [], "branchCoverageHistory": [], "historicCoverages": [] },
-      { "name": "FsLibLog.Types", "reportPath": "FsLibLog_Types.htm", "coveredLines": 0, "uncoveredLines": 43, "coverableLines": 43, "totalLines": 628, "coverageType": "LineCoverage", "methodCoverage": "-", "coveredBranches": 0, "totalBranches": 0, "lineCoverageHistory": [], "branchCoverageHistory": [], "historicCoverages": [] },
+      { "name": "FsLibLog.LogProvider", "reportPath": "FsLibLog_LogProvider.htm", "coveredLines": 0, "uncoveredLines": 29, "coverableLines": 29, "totalLines": 795, "coverageType": "LineCoverage", "methodCoverage": "-", "coveredBranches": 0, "totalBranches": 8, "lineCoverageHistory": [], "branchCoverageHistory": [], "historicCoverages": [] },
+      { "name": "FsLibLog.Providers", "reportPath": "FsLibLog_Providers.htm", "coveredLines": 0, "uncoveredLines": 153, "coverableLines": 153, "totalLines": 795, "coverageType": "LineCoverage", "methodCoverage": "-", "coveredBranches": 0, "totalBranches": 4, "lineCoverageHistory": [], "branchCoverageHistory": [], "historicCoverages": [] },
+      { "name": "FsLibLog.Types", "reportPath": "FsLibLog_Types.htm", "coveredLines": 0, "uncoveredLines": 54, "coverableLines": 54, "totalLines": 795, "coverageType": "LineCoverage", "methodCoverage": "-", "coveredBranches": 0, "totalBranches": 0, "lineCoverageHistory": [], "branchCoverageHistory": [], "historicCoverages": [] },
       { "name": "System.AssemblyVersionInformation", "reportPath": "FsLibLog_AssemblyVersionInformation.htm", "coveredLines": 0, "uncoveredLines": 0, "coverableLines": 0, "totalLines": 0, "coverageType": "MethodCoverage", "methodCoverage": "-", "coveredBranches": 0, "totalBranches": 0, "lineCoverageHistory": [], "branchCoverageHistory": [], "historicCoverages": [] },
     ]},
 ];
