@@ -727,7 +727,7 @@ module LogProvider =
     ///
     /// **Output Type**
     ///   * `IDisposable`
-    let openNextedContext (value : string) =
+    let openNestedContext (value : string) =
         let provider  = getCurrentLogProvider ()
         match provider with
         | Some p ->
