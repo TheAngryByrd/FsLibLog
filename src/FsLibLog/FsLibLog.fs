@@ -47,12 +47,23 @@ module Types =
 
     [<AutoOpen>]
     module Inner =
-        type DisposableList (disposables : IDisposable list) =
+        open System.Collections.Generic
+
+        type DisposableStack() =
+            let stack = Stack<IDisposable>()
+
             interface IDisposable with
                 member __.Dispose () =
-                    disposables |> List.iter(fun d -> try d.Dispose() with e -> printfn "%A" e)
+                    while stack.Count > 0 do
+                        stack.Pop().Dispose()
 
-            static member Create (disposables : IDisposable list) = new DisposableList(disposables)
+            member __.Push (item : IDisposable) = stack.Push item
+            member __.Push (items : IDisposable list) = items |> List.iter stack.Push
+
+            static member Create (items : IDisposable list) =
+                let ds = new DisposableStack()
+                ds.Push items
+                ds
 
         type ILog with
 
@@ -69,8 +80,8 @@ module Types =
                 use __ =
                     log.AdditionalNamedParameters
                     |> List.map(fun (key,value, destructure) -> logger.MappedContext key value destructure)
-                    |> List.rev // This reverse is important, it causes us to unwind as if you have multiple uses in a row
-                    |> DisposableList.Create
+                    // This stack is important, it causes us to unwind as if you have multiple uses in a row
+                    |> DisposableStack.Create
 
                 log.Parameters
                 |> List.toArray
