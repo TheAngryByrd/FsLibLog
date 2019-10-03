@@ -803,7 +803,7 @@ module LogProvider =
 
     /// **Description**
     ///
-    /// Creates a logger given a Quotations.Expr type. ONLY useful for module level declarations. It uses the DeclaringType on the PropertyInfo of the PropertyGet.
+    /// Creates a logger given a Quotations.Expr type. This is only useful for module level declarations. It uses the DeclaringType on the PropertyInfo of the PropertyGet.
     ///
     /// It can be utilized like:
     ///

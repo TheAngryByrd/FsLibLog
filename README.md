@@ -55,7 +55,9 @@ open FsLibLog.Types
 
 There are currently three ways to get a logger.
 
-- `getCurrentLogger` - Creates a logger. It's name is based on the current StackFrame.
+- `getCurrentLogger` - __Deprecated__ because inferring the correct StackFrame is too difficult. Creates a logger. It's name is based on the current StackFrame. 
+- `getLoggerByFunc` - Creates a logger based on `Reflection.MethodBase.GetCurrentMethod` call.  This is only useful for calls within functions.
+- `getLoggerByQuotation` - Creates a logger given a Quotations.Expr type. This is only useful for module level declarations.
 - `getLoggerFor` - Creates a logger given a `'a` type.
 - `getLoggerByType` - Creates a logger given a `Type`.
 - `getLoggerByName` - Creates a logger given a `string`.
