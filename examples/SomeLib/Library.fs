@@ -3,7 +3,8 @@ open FsLibLog
 open FsLibLog.Types
 
 module Say =
-    let logger = LogProvider.getCurrentLogger()
+    // let logger = LogProvider.getLoggerByName "SomeLibrary.Say"
+    let rec logger = LogProvider.getLoggerByQuotation <@ logger @>
 
     type AdditionalData = {
         Name : string
