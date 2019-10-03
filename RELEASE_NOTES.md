@@ -1,3 +1,6 @@
+#### 0.3.0 - 2019-10-03
+* FEATURE: Adds to LogProvider two new methods `getLoggerByQuotation` and `getLoggerByFunc`. Also deprecates `getCurrentLogger`. (https://github.com/TheAngryByrd/FsLibLog/pull/7)
+
 #### 0.2.1 - 2019-07-23
 * BUGFIX: Fixed openNestedContext typo
 * MINOR: Replaced DisposableList and List.rev with DisposeableStack
