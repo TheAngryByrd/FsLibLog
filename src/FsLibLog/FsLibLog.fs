@@ -657,6 +657,7 @@ module LogProvider =
     open Types
     open Providers
     open System.Diagnostics
+    open Microsoft.FSharp.Quotations.Patterns
 
     let mutable private currentLogProvider = None
 
@@ -792,14 +793,61 @@ module LogProvider =
     let getLoggerFor<'a> () =
         getLoggerByType(typeof<'a>)
 
+    let rec getModuleType =
+        function
+        | PropertyGet (_, propertyInfo, _) -> propertyInfo.DeclaringType
+        // | Call (_, methInfo, _) -> sprintf "%s.%s" methInfo.DeclaringType.FullName methInfo.Name
+        // | Lambda(_, expr) -> getModuleType expr
+        // | ValueWithName(_,_,instance) -> instance
+        | x -> failwithf "Expression is not a property. %A" x
+
     /// **Description**
     ///
-    /// Creates a logger. It's name is based on the current StackFrame. This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
-    /// WARNING: This has inconsisent results.
+    /// Creates a logger given a Quotations.Expr type. This is only useful for module level declarations. It uses the DeclaringType on the PropertyInfo of the PropertyGet.
+    ///
+    /// It can be utilized like:
+    ///
+    /// `let rec logger = LogProvider.getLoggerByQuotation <@ logger @>`
+    ///
+    /// inside a module to get the modules full qualitfied name.
+    ///
+    /// **Parameters**
+    ///   * `quotation` - parameter of type `Quotations.Expr`
     ///
     /// **Output Type**
     ///   * `ILog`
     ///
+    /// **Exceptions**
+    ///
+    let getLoggerByQuotation (quotation : Quotations.Expr) =
+        getModuleType quotation
+        |> getLoggerByType
+
+
+
+    /// **Description**
+    ///
+    /// Creates a logger based on `Reflection.MethodBase.GetCurrentMethod` call.  This is only useful for calls within functions.  This does not protect against inlined functions.
+    ///
+    /// **Output Type**
+    ///   * `ILog`
+    ///
+    /// **Exceptions**
+    ///
+    let inline getLoggerByFunc () =
+        let mi = Reflection.MethodBase.GetCurrentMethod()
+        sprintf "%s.%s" mi.DeclaringType.FullName mi.Name
+        |> getLoggerByName
+
+
+    /// **Description**
+    ///
+    /// Creates a logger. It's name is based on the current StackFrame. This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
+    /// Obsolete: getCurrentLogger is obsolete, choose another provider factory function.
+    ///
+    /// **Output Type**
+    ///   * `ILog`
+    [<Obsolete("getCurrentLogger is obsolete, choose another provider factory function")>]
     let getCurrentLogger ()   =
         let stackFrame = StackFrame(2, false)
         getLoggerByType(stackFrame.GetMethod().DeclaringType)
