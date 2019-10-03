@@ -793,14 +793,18 @@ module LogProvider =
     let getLoggerFor<'a> () =
         getLoggerByType(typeof<'a>)
 
-    let private getModuleType =
+    let rec getModuleType =
         function
         | PropertyGet (_, propertyInfo, _) -> propertyInfo.DeclaringType
-        | _ -> failwith "Expression is not a property."
+        // | Call (_, methInfo, _) -> sprintf "%s.%s" methInfo.DeclaringType.FullName methInfo.Name
+        // | Lambda(_, expr) -> getModuleType expr
+        // | ValueWithName(_,_,instance) -> instance
+        | x -> failwithf "Expression is not a property. %A" x
 
     /// **Description**
     ///
-    /// Creates a logger given a Quotations.Expr type. It uses the DeclaringType on the PropertyInfo of the PropertyGet.
+    /// Creates a logger given a Quotations.Expr type. ONLY useful for module level declarations. It uses the DeclaringType on the PropertyInfo of the PropertyGet.
+    ///
     /// It can be utilized like:
     ///
     /// `let rec logger = LogProvider.getLoggerByQuotation <@ logger @>`
@@ -818,6 +822,23 @@ module LogProvider =
     let getLoggerByQuotation (quotation : Quotations.Expr) =
         getModuleType quotation
         |> getLoggerByType
+
+
+
+    /// **Description**
+    ///
+    /// Creates a logger based on `Reflection.MethodBase.GetCurrentMethod` call.  This is only useful for calls within functions.  This does not protect against inlined functions.
+    ///
+    /// **Output Type**
+    ///   * `ILog`
+    ///
+    /// **Exceptions**
+    ///
+    let inline getLoggerByFunc () =
+        let mi = Reflection.MethodBase.GetCurrentMethod()
+        sprintf "%s.%s" mi.DeclaringType.FullName mi.Name
+        |> getLoggerByName
+
 
     /// **Description**
     ///

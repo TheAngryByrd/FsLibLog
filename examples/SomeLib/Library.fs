@@ -5,17 +5,17 @@ open FsLibLog.Types
 module Say =
     // let logger = LogProvider.getLoggerByName "SomeLibrary.Say"
     let rec logger = LogProvider.getLoggerByQuotation <@ logger @>
-
     type AdditionalData = {
         Name : string
     }
 
-
+    let rec myModule = LogProvider.getModuleType <@ myModule @>
     // Example Log Output:
     // 16:23 [Information] <SomeLib.Say> () "Captain" Was said hello to - {"UserContext": {"Name": "User123", "$type": "AdditionalData"}, "FunctionName": "hello"}
     let hello name  =
+        let logger2 = LogProvider.getLoggerByFunc ()
         // Starts the log out as an Informational log
-        logger.info(
+        logger2.info(
             Log.setMessage "{name} Was said hello to"
             // MessageTemplates require the order of parameters to be consistent with the tokens to replace
             >> Log.addParameter name
