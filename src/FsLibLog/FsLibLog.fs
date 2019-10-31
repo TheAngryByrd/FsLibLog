@@ -417,6 +417,8 @@ module Providers =
         let isAvailable () = true
 
         type private ConsoleProvider () =
+            let propertyStack = System.Collections.Generic.Stack<string * obj>()
+
             let threadSafeWriter =  MailboxProcessor.Start(fun inbox ->
                 let rec loop () = async {
                     let! (consoleColor, message : string) = inbox.Receive()
@@ -439,6 +441,7 @@ module Providers =
                     (LogLevel.Debug, ConsoleColor.Gray)
                     (LogLevel.Trace, ConsoleColor.DarkGray)
                 ])
+
             let writeMessage name logLevel (messageFunc : MessageThunk) ``exception`` formatParams =
                 match messageFunc with
                 | None -> true
@@ -448,26 +451,44 @@ module Providers =
                         | Some color -> color
                         | None -> Console.ForegroundColor
                     let formattedMsg =
-                        let msg = String.Format(CultureInfo.InvariantCulture, m (), formatParams)
+                        let mutable msg = m ()
+
+                        // have to do name replacements first
+                        for (propertyName, propertyValue) in (Seq.rev propertyStack) do
+                          let name = sprintf "{%s}" propertyName
+                          let value = sprintf "%A" propertyValue
+                          msg <- msg.Replace(name, value)
+
+                        // then c# numeric replacements
+                        let msg = String.Format(CultureInfo.InvariantCulture, msg , formatParams)
+
+                        // then exception
                         let msg =
                             match ``exception`` with
                             | Some (e : exn) ->
                                 String.Format("{0} | {1}", msg, e.ToString())
                             | None ->
                                 msg
+
+                        // stitch it all together
                         String.Format("{0} | {1} | {2} | {3}", DateTime.UtcNow, logLevel, name, msg)
 
                     threadSafeWriter.Post(color, formattedMsg)
                     true
 
+            let addProp key value =
+              propertyStack.Push(key, value)
+              { new IDisposable with
+                  member __.Dispose () = propertyStack.Pop () |> ignore }
+
             interface ILogProvider with
 
                 member this.GetLogger(name: string): Logger =
                     writeMessage name
-                member this.OpenMappedContext(arg1: string) (arg2: obj) (arg3: bool): System.IDisposable =
-                    failwith "Not Implemented"
-                member this.OpenNestedContext(arg1: string): System.IDisposable =
-                    failwith "Not Implemented"
+                member this.OpenMappedContext(key: string) (value: obj) (destructure: bool): System.IDisposable =
+                    addProp key value
+                member this.OpenNestedContext(message: string): System.IDisposable =
+                    addProp "NDC" message
 
         let create () =
             ConsoleProvider () :> ILogProvider
