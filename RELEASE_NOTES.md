@@ -1,3 +1,6 @@
+#### 0.4.1 -2019-11-08
+* BUGFIX: fix edge case with {}s in logs
+
 #### 0.4.0 -2019-10-31
 * FEATURE: Implement simple propertyname logging for the console logger https://github.com/TheAngryByrd/FsLibLog/pull/8
 
