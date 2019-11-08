@@ -459,6 +459,10 @@ module Providers =
                           let value = sprintf "%A" propertyValue
                           msg <- msg.Replace(name, value)
 
+                        // it's possible for msg at this point to have what looks like format
+                        // specifiers, which will cause String.Format to puke
+                        let msg = msg.Replace("{", "{{").Replace("}", "}}")
+
                         // then c# numeric replacements
                         let msg = String.Format(CultureInfo.InvariantCulture, msg , formatParams)
 
