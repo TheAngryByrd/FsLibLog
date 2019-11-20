@@ -34,8 +34,8 @@ type FsLibLogLogger (logger :  FsLibLog.Types.ILog) =
             let format = "{connectorId} : {message}"
             let logConfig =
                 Log.setMessage format
-                >> Log.addParameter connectorId
-                >> Log.addParameter message
+                >> Log.addContext "connectorId" connectorId
+                >> Log.addContext "message" message
                 >> Log.addException ex
             log
             |> logConfig
