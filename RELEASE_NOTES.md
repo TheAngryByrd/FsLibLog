@@ -1,3 +1,7 @@
+#### 0.5.1 - 2019-11-20
+* BUGFIX: Fix message parameter replacement for npgsql adapter (https://github.com/TheAngryByrd/FsLibLog/pull/11)
+
+
 #### 0.5.0 -2019-11-08
 * BREAKING: Remove ConsoleProvider from main code (https://github.com/TheAngryByrd/FsLibLog/pull/10)
 
