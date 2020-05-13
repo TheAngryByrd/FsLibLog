@@ -36,7 +36,7 @@ Here is an example with FAKE 5:
 
 ```fsharp
 Target.create "Replace" <| fun _ ->
-  Shell.ReplaceInFiles
+  Shell.replaceInFiles
     [ "FsLibLog", "MyLib.Logging" ]
     (!! "paket-files/TheAngryByrd/FsLibLog/src/FsLibLog/FsLibLog.fs")
 ```
