@@ -10,7 +10,7 @@ nuget Expecto 8.7
 nuget SourceLink.Create.CommandLine 2.8.1 copy_local: true
 nuget YoloDev.Expecto.TestSdk 0.7.0
 nuget Microsoft.NET.Test.Sdk 15.7.2
-nuget altcover 4.0.603
+nuget altcover 6.6.747
 
 nuget NpgSql
 nuget Marten
@@ -21,15 +21,15 @@ group Build
     storage: none
     source https://www.nuget.org/api/v2
     source https://api.nuget.org/v3/index.json
-    nuget Fake.IO.FileSystem
-    nuget Fake.Core.Target
-    nuget Fake.Core.ReleaseNotes
-    nuget FAKE.Core.Environment
-    nuget Fake.DotNet.Cli
-    nuget FAKE.Core.Process
-    nuget Fake.DotNet.AssemblyInfoFile
-    nuget Fake.Tools.Git
-    nuget Fake.DotNet.Paket
-    nuget Fake.Api.GitHub
-    nuget Fake.BuildServer.AppVeyor
-    nuget Fake.BuildServer.Travis
+    nuget Fake.IO.FileSystem 5.20.0
+    nuget Fake.Core.Target 5.20.0
+    nuget Fake.Core.ReleaseNotes 5.20.0
+    nuget FAKE.Core.Environment 5.20.0
+    nuget Fake.DotNet.Cli 5.20.0
+    nuget FAKE.Core.Process 5.20.0
+    nuget Fake.DotNet.AssemblyInfoFile 5.20.0
+    nuget Fake.Tools.Git 5.20.0
+    nuget Fake.DotNet.Paket 5.20.0
+    nuget Fake.Api.GitHub 5.20.0
+    nuget Fake.BuildServer.AppVeyor 5.20.0
+    nuget Fake.BuildServer.Travis 5.20.0

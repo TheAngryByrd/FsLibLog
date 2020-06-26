@@ -20,6 +20,10 @@ BuildServer.install [
     Travis.Installer
 ]
 
+//-----------------------------------------------------------------------------
+// Metadata and Configuration
+//-----------------------------------------------------------------------------
+
 
 let release = Fake.Core.ReleaseNotes.load "RELEASE_NOTES.md"
 let productName = "FsLibLog"
@@ -40,23 +44,32 @@ let coverageReportDir =  __SOURCE_DIRECTORY__  @@ "docs" @@ "coverage"
 let gitOwner = "TheAngryByrd"
 let gitRepoName = "FsLibLog"
 
+let releaseBranch = "master"
+
+//-----------------------------------------------------------------------------
+// Helpers
+//-----------------------------------------------------------------------------
+
 let isRelease (targets : Target list) =
     targets
     |> Seq.map(fun t -> t.Name)
     |> Seq.exists ((=)"Release")
 
+let invokeAsync f = async { f () }
+
 let configuration (targets : Target list) =
     let defaultVal = if isRelease targets then "Release" else "Debug"
     match Environment.environVarOrDefault "CONFIGURATION" defaultVal with
-     | "Debug" -> DotNet.BuildConfiguration.Debug
-     | "Release" -> DotNet.BuildConfiguration.Release
-     | config -> DotNet.BuildConfiguration.Custom config
+    | "Debug" -> DotNet.BuildConfiguration.Debug
+    | "Release" -> DotNet.BuildConfiguration.Release
+    | config -> DotNet.BuildConfiguration.Custom config
 
 let failOnBadExitAndPrint (p : ProcessResult) =
     if p.ExitCode <> 0 then
         p.Errors |> Seq.iter Trace.traceError
         failwithf "failed with exitcode %d" p.ExitCode
 
+// CI Servers can have bizzare failures that have nothing to do with your code
 let rec retryIfInCI times fn =
     match Environment.environVarOrNone "CI" with
     | Some _ ->
@@ -68,6 +81,10 @@ let rec retryIfInCI times fn =
         else
             fn()
     | _ -> fn()
+
+let isReleaseBranchCheck () =
+    if Git.Information.getBranchName "" <> releaseBranch then failwithf "Not on %s.  If you want to release please switch to this branch." releaseBranch
+
 
 module dotnet =
     let watch cmdParam program args =
@@ -102,15 +119,14 @@ Target.create "Clean" <| fun _ ->
     |> Shell.cleanDirs
 
 Target.create "DotnetRestore" <| fun _ ->
-    [sln ; toolsDir]
+    [sln]
     |> Seq.map(fun dir -> fun () ->
         let args =
             [
-                sprintf "/p:PackageVersion=%s" release.NugetVersion
             ] |> String.concat " "
         DotNet.restore(fun c ->
             { c with
-                 Common =
+                Common =
                     c.Common
                     |> DotNet.Options.withCustomParams
                         (Some(args))
@@ -135,7 +151,6 @@ Target.create "DotnetBuild" <| fun ctx ->
         }) sln
 
 
-let invokeAsync f = async { f () }
 
 let coverageThresholdPercent = 80
 
@@ -267,11 +282,6 @@ Target.create "SourcelinkTest" <| fun _ ->
         dotnet.sourcelink id (sprintf "test %s" nupkg)
     )
 
-
-let isReleaseBranchCheck () =
-    let releaseBranch = "master"
-    if Git.Information.getBranchName "" <> releaseBranch then failwithf "Not on %s.  If you want to release please switch to this branch." releaseBranch
-
 Target.create "Publish" <| fun _ ->
     isReleaseBranchCheck ()
 
@@ -330,6 +340,7 @@ Target.create "Release" ignore
   ==> "DotnetBuild"
   ==> "DotnetTest"
   ==> "GenerateCoverageReport"
+  ==> "DotnetPack"
   ==> "GitRelease"
   ==> "GitHubRelease"
   ==> "Release"
