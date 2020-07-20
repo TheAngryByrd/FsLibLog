@@ -23,6 +23,7 @@ module Types =
     type MappedContext = string -> obj -> bool -> IDisposable
 
     /// Type representing a Log
+    [<NoEquality;NoComparison>]
     type Log = {
         LogLevel : LogLevel
         Message : MessageThunk
@@ -468,6 +469,7 @@ module Providers =
                     destructureObjectsParam).Compile()
             fun name -> func.Invoke("SourceContext", name, false)
 
+        [<NoEquality;NoComparison>]
         type SerilogGateway = {
             Write : obj -> obj -> string -> obj [] -> unit
             WriteException : obj -> obj -> exn -> string -> obj [] -> unit
