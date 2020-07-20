@@ -1,6 +1,8 @@
+#### 0.5.2 - 2020-07-20
+* BUGFIX: Warning Level 5 compliance (https://github.com/TheAngryByrd/FsLibLog/pull/14)
+
 #### 0.5.1 - 2019-11-20
 * BUGFIX: Fix message parameter replacement for npgsql adapter (https://github.com/TheAngryByrd/FsLibLog/pull/11)
-
 
 #### 0.5.0 -2019-11-08
 * BREAKING: Remove ConsoleProvider from main code (https://github.com/TheAngryByrd/FsLibLog/pull/10)
