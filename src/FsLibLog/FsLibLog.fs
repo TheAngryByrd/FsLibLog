@@ -253,64 +253,39 @@ module Types =
 
     module Log =
 
-        /// **Description**
-        ///
-        /// Amends a `Log` with a message
-        ///
-        /// **Parameters**
-        ///   * `message` - parameter of type `string`
-        ///   * `log` - parameter of type `Log`
-        ///
-        /// **Output Type**
-        ///   * `Log`
+        /// <summary>
+        /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with a message.
+        /// </summary>
+        /// <param name="message">The message to set for the log.</param>
+        /// <param name="log">The log to amend.</param>
+        /// <returns>The amended log.</returns>
         let setMessage (message : string) (log : Log) =
             { log with Message = Some (fun () -> message) }
 
-        /// **Description**
-        ///
-        /// Amends a `Log` with a message thunk.  Useful for "expensive" string construction scenarios.
-        ///
-        /// **Parameters**
-        ///   * `messageThunk` - parameter of type `unit -> string`
-        ///   * `log` - parameter of type `Log`
-        ///
-        /// **Output Type**
-        ///   * `Log`
-        ///
-        /// **Exceptions**
-        ///
+        /// <summary>
+        /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with a message thunk.  Useful for "expensive" string construction scenarios.
+        /// </summary>
+        /// <param name="messageThunk">The function that generates a message to add to a Log.</param>
+        /// <param name="log">The log to amend.</param>
+        /// <returns>The amended log.</returns>
         let setMessageThunk (messageThunk : unit -> string) (log : Log) =
             { log with Message = Some messageThunk }
 
-        /// **Description**
-        ///
-        /// Amends a `Log` with a parameter.
-        ///
-        /// **Parameters**
-        ///   * `param` - parameter of type `'a`
-        ///   * `log` - parameter of type `Log`
-        ///
-        /// **Output Type**
-        ///   * `Log`
-        ///
-        /// **Exceptions**
-        ///
+        /// <summary>
+        /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with a parameter.
+        /// </summary>
+        /// <param name="param">The value to add to the log</param>
+        /// <param name="log">The log to amend.</param>
+        /// <returns>The amended log.</returns>
         let addParameter (param : 'a) (log : Log) =
             { log with Parameters = List.append log.Parameters [(box param)] }
 
-        /// **Description**
-        ///
-        /// Amends a `Log` with a list of parameters.
-        ///
-        /// **Parameters**
-        ///   * `params` - parameter of type `obj list`
-        ///   * `log` - parameter of type `Log`
-        ///
-        /// **Output Type**
-        ///   * `Log`
-        ///
-        /// **Exceptions**
-        ///
+        /// <summary>
+        /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with a list of parameters.
+        /// </summary>
+        /// <param name="params">The values to add to the log, in the form of an `obj list`.</param>
+        /// <param name="log">The log to amend.</param>
+        /// <returns>The amended log.</returns>
         let addParameters (``params`` : obj list) (log : Log) =
             let ``params`` =
                 ``params``
@@ -319,95 +294,116 @@ module Types =
 
 
 
-        /// **Description**
-        ///
-        /// Amends a `Log` with additional named parameters for context. This helper adds more context to a log.
+        /// <summary>
+        /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with additional named parameters for context. This helper adds more context to a log.
         /// This DOES NOT affect the parameters set for a message template.
         /// This is the same calling OpenMappedContext right before logging.
-        ///
-        /// **Parameters**
-        ///   * `key` - parameter of type `string`
-        ///   * `value` - parameter of type `obj`
-        ///   * `log` - parameter of type `Log`
-        ///
-        /// **Output Type**
-        ///   * `Log`
-        ///
-        /// **Exceptions**
-        ///
+        /// </summary>
+        /// <param name="key">The key of the parameter to add to the log.</param>
+        /// <param name="value">The value of the parameter to add to the log.</param>
+        /// <param name="log">The log to amend.</param>
+        /// <returns>The amended log.</returns>
         let addContext (key : string) (value : obj) (log : Log) =
             { log with AdditionalNamedParameters = List.append log.AdditionalNamedParameters [key, (box value), false] }
 
 
         /// **Description**
-        ///
-        /// Amends a `Log` with additional named parameters for context. This helper adds more context to a log.
+        /// <summary>
+        /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with additional named parameters for context. This helper adds more context to a log.
         /// This DOES NOT affect the parameters set for a message template.
         /// This is the same calling OpenMappedContext right before logging.
         /// This destructures an object rather than calling `ToString()` on it.
         /// WARNING: Destructring can be expensive.
-        ///
-        /// **Parameters**
-        ///   * `key` - parameter of type `string`
-        ///   * `value` - parameter of type `obj`
-        ///   * `log` - parameter of type `Log`
-        ///
-        /// **Output Type**
-        ///   * `Log`
-        ///
-        /// **Exceptions**
-        ///
+        /// </summary>
+        /// <param name="key">The key of the parameter to add to the log.</param>
+        /// <param name="value">The value of the parameter to add to the log.</param>
+        /// <param name="log">The log to amend.</param>
+        /// <returns>The amended log.</returns>
         let addContextDestructured (key : string) (value : obj) (log : Log) =
             { log with AdditionalNamedParameters = List.append log.AdditionalNamedParameters [key, (box value),true] }
 
 
-        /// **Description**
-        ///
-        /// Amends a `Log` with an `exn`. Handles nulls.
-        ///
-        /// **Parameters**
-        ///   * `exception` - parameter of type `exn`
-        ///   * `log` - parameter of type `Log`
-        ///
-        /// **Output Type**
-        ///   * `Log`
-        ///
-        /// **Exceptions**
-        ///
+        /// <summary>
+        /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with an <see cref="T:System.Exception">exn</see>. Handles nulls.
+        /// </summary>
+        /// <param name="exception">The exception to add to the log.</param>
+        /// <param name="log">The log to amend.</param>
+        /// <returns>The amended log.</returns>
         let addException (``exception`` : exn) (log : Log) =
             { log with Exception = Option.ofObj ``exception``}
 
-        /// **Description**
-        ///
-        /// Amends a `Log` with an `exn`.  Handles nulls.
-        ///
-        /// **Parameters**
-        ///   * `exception` - parameter of type `exn`
-        ///   * `log` - parameter of type `Log`
-        ///
-        /// **Output Type**
-        ///   * `Log`
-        ///
-        /// **Exceptions**
-        ///
+        /// <summary>
+        /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with an <see cref="T:System.Exception">exn</see>. Handles nulls.
+        /// </summary>
+        /// <param name="exception">The exception to add to the log.</param>
+        /// <param name="log">The log to amend.</param>
+        /// <returns>The amended log.</returns>
         let addExn (``exception`` : exn) (log : Log) =
             addException ``exception`` log
 
-        /// **Description**
-        ///
+        /// <summary>
         /// Amends a `Log` with a given `LogLevel`
-        ///
-        /// **Parameters**
-        ///   * `logLevel` - parameter of type `LogLevel`
-        ///   * `log` - parameter of type `Log`
-        ///
-        /// **Output Type**
-        ///   * `Log`
-        ///
-        /// **Exceptions**
-        ///
+        /// </summary>
+        /// <param name="logLevel">The level to set for the log.</param>
+        /// <param name="log">The log to amend.</param>
+        /// <returns>The amended log.</returns>
         let setLogLevel (logLevel : LogLevel) (log : Log) =
             { log with LogLevel = logLevel}
+
+
+/// Provides operators to make writing logs more streamlined.
+module Operators =
+
+    /// <summary>
+    /// Amend a log with a message. Wrapper for <see cref="M:FsLibLog.Types.LogModule.setMessage">Log.setMessage</see>.
+    /// </summary>
+    /// <param name="message">The string of the base message.</param>
+    /// <returns>A new Log instance with the specified message.</returns>
+    let (!!) message = Log.setMessage message
+
+    /// <summary>
+    /// Amends a log with a parameter. Wrapper for <see cref="M:FsLibLog.Types.LogModule.addParameter">Log.addParameter</see>.
+    /// </summary>
+    /// <param name="log">The Log to add the parameter to.</param>
+    /// <param name="value">The value for the parameter.</param>
+    /// <returns>The Log with the added parameter.</returns>
+    let (>>!) log value = log >> Log.addParameter value
+
+    /// <summary>
+    /// Amends a Log with additional named parameters for context. This helper adds more context to a log.
+    /// This DOES NOT affect the parameters set for a message template. This is the same calling OpenMappedContext right before logging.
+    ///
+    /// Wrapper for <see cref="M:FsLibLog.Types.LogModule.addContext">Log.addContext</see>.
+    /// </summary>
+    /// <param name="log">The log to add the parameter to.</param>
+    /// <param name="key">The name for the parameter.</param>
+    /// <param name="value">The value for the parameter.</param>
+    /// <returns>The amended log with the parameter added.</returns>
+    let (>>!-) log (key, value) = log >> Log.addContext key value
+
+    /// <summary>
+    /// Amends a Log with additional named parameters for context. This helper adds more context to a log. This DOES NOT affect the parameters set for a message template.
+    /// This is the same calling OpenMappedContext right before logging. This destructures an object rather than calling ToString() on it. WARNING: Destructring can be expensive.
+    ///
+    /// Wrapper for <see cref="M:FsLibLog.Types.LogModule.addContextDestructured">Log.addContextDestructured</see>.
+    /// </summary>
+    /// <param name="log">The log to add the parameter to.</param>
+    /// <param name="key">The name for the parameter.</param>
+    /// <param name="value">The value for the parameter.</param>
+    /// <returns>The amended log with the parameter added.</returns>
+    let (>>!+) log (key, value) = log >> Log.addContextDestructured key value
+
+    /// <summary>
+    /// Amends a Log with an exn. Handles nulls.
+    ///
+    /// Wrapper for <see cref="M:FsLibLog.Types.LogModule.addException">Log.addException</see>.
+    /// </summary>
+    /// <param name="log">The log to add the parameter to.</param>
+    /// <param name="e">The exception to add to the log.</param>
+    /// <returns>The amended log with the parameter added.</returns>
+    let (>>!!) log e = log >> Log.addException e
+
+
 module Providers =
     module SerilogProvider =
         open System
@@ -788,4 +784,3 @@ module LogProvider =
     let getCurrentLogger ()   =
         let stackFrame = StackFrame(2, false)
         getLoggerByType(stackFrame.GetMethod().DeclaringType)
-
