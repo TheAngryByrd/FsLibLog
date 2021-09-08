@@ -792,51 +792,51 @@ module LogProvider =
 /// Provides operators to make writing logs more streamlined.
 module Operators =
 
-    /// Initializes a log with the specified message
-    ///
-    /// **Parameters**
-    ///   * `message` - parameter of type `string`
-    ///
-    /// **Output Type**
-    ///   * `Log`
+    /// <summary>
+    /// Amend a log with a message. Wrapper for `Log.setMessage`.
+    /// </summary>
+    /// <param name="message">The `string` of the base message.</param>
+    /// <returns>A new Log instance with the specified message.</returns>
     let (!!) message = Log.setMessage message
 
-    /// Adds a Parameter to a log.
-    ///
-    /// **Parameters**
-    ///   * `log` - parameter of type `Log`
-    ///   * `value` - parameter of type `'a`
-    ///
-    /// **Output Type**
-    ///   * `Log`
+    /// <summary>
+    /// Amends a log with a parameter. Wrapper for `Log.addParameter`.
+    /// </summary>
+    /// <param name="log">The Log to add the parameter to.</param>
+    /// <param name="value">The value for the parameter.</param>
+    /// <returns>The Log with the added parameter.</returns>
     let (>>!) log value = log >> Log.addParameter value
 
-    /// Add a Value for the specified Key to a Log. Does not destructure the Value.
+    /// <summary>
+    /// Amends a Log with additional named parameters for context. This helper adds more context to a log.
+    /// This DOES NOT affect the parameters set for a message template. This is the same calling OpenMappedContext right before logging.
     ///
-    /// **Parameters**
-    ///   * `log` - parameter of type `Log`
-    ///   * `(key, value)` - parameter of type `(string, obj)`
-    ///
-    /// **Output Type**
-    ///   * `Log`
+    /// Wrapper for `Log.addContext`.
+    /// </summary>
+    /// <param name="log">The log to add the parameter to.</param>
+    /// <param name="key">The name for the parameter.</param>
+    /// <param name="value">The value for the parameter.</param>
+    /// <returns>The amended log with the parameter added.</returns>
     let (>>!-) log (key, value) = log >> Log.addContext key value
 
-    /// Add a Value for a specified Key to a Log. Destructures the Value.
+    /// <summary>
+    /// Amends a Log with additional named parameters for context. This helper adds more context to a log. This DOES NOT affect the parameters set for a message template.
+    /// This is the same calling OpenMappedContext right before logging. This destructures an object rather than calling ToString() on it. WARNING: Destructring can be expensive.
     ///
-    /// **Parameters**
-    ///   * `log` - parameter of type `Log`
-    ///   * `(key, value)` - parameter of type `(string, obj)`
-    ///
-    /// **Output Type**
-    ///   * `Log`
+    /// Wrapper for `Log.addContextDestructured`.
+    /// </summary>
+    /// <param name="log">The log to add the parameter to.</param>
+    /// <param name="key">The name for the parameter.</param>
+    /// <param name="value">The value for the parameter.</param>
+    /// <returns>The amended log with the parameter added.</returns>
     let (>>!+) log (key, value) = log >> Log.addContextDestructured key value
 
-    /// Add an Exception to a log.
+    /// <summary>
+    /// Amends a Log with an exn. Handles nulls.
     ///
-    /// **Parameters**
-    ///   * `log` - parameter of type `Log`
-    ///   * `e` - parameter of type `Exception`
-    ///
-    /// **Output Type**
-    ///   * `Log`
+    /// Wrapper for `Log.addException`.
+    /// </summary>
+    /// <param name="log">The log to add the parameter to.</param>
+    /// <param name="e">The exception to add to the log.</param>
+    /// <returns>The amended log with the parameter added.</returns>
     let (>>!!) log e = log >> Log.addException e
