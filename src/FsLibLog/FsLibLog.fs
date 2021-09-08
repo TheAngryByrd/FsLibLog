@@ -789,3 +789,54 @@ module LogProvider =
         let stackFrame = StackFrame(2, false)
         getLoggerByType(stackFrame.GetMethod().DeclaringType)
 
+/// Provides operators to make writing logs more streamlined.
+module Operators =
+
+    /// Initializes a log with the specified message
+    ///
+    /// **Parameters**
+    ///   * `message` - parameter of type `string`
+    ///
+    /// **Output Type**
+    ///   * `Log`
+    let (!!) message = Log.setMessage message
+
+    /// Adds a Parameter to a log.
+    ///
+    /// **Parameters**
+    ///   * `log` - parameter of type `Log`
+    ///   * `value` - parameter of type `'a`
+    ///
+    /// **Output Type**
+    ///   * `Log`
+    let (>>!) log value = log >> Log.addParameter value
+
+    /// Add a Value for the specified Key to a Log. Does not destructure the Value.
+    ///
+    /// **Parameters**
+    ///   * `log` - parameter of type `Log`
+    ///   * `(key, value)` - parameter of type `(string, obj)`
+    ///
+    /// **Output Type**
+    ///   * `Log`
+    let (>>!-) log (key, value) = log >> Log.addContext key value
+
+    /// Add a Value for a specified Key to a Log. Destructures the Value.
+    ///
+    /// **Parameters**
+    ///   * `log` - parameter of type `Log`
+    ///   * `(key, value)` - parameter of type `(string, obj)`
+    ///
+    /// **Output Type**
+    ///   * `Log`
+    let (>>!+) log (key, value) = log >> Log.addContextDestructured key value
+
+    /// Add an Exception to a log.
+    ///
+    /// **Parameters**
+    ///   * `log` - parameter of type `Log`
+    ///   * `e` - parameter of type `Exception`
+    ///
+    /// **Output Type**
+    ///   * `Log`
+    let (>>!!) log e = log >> Log.addException e

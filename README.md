@@ -96,6 +96,7 @@ The set of functions to augment the `Log` record are
 namespace SomeLib
 open FsLibLog
 open FsLibLog.Types
+open FsLibLog.Operators
 
 
 module Say =
@@ -160,6 +161,20 @@ module Say =
                 // Adds an exception to the log
                 >> Log.addException  e
             )
+
+    // Has the same logging output as `hello`, above, but uses the Operators module.
+    let helloWithOperators name =
+        // Initiate a log with a message
+        !! "{name} Was said hello to"
+        // Add a parameter
+        >>! name
+        // Adds a value, but does not destructure it.
+        >>!- ("FunctionName", "operators")
+        // Adds a value & destructures it.
+        >>!+ ("UserContext", {Name = "User123"})
+        // Logs at the Info level.
+        |> logger.info
+        sprintf "hello %s." name
 
 ```
 
