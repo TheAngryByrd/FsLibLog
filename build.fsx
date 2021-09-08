@@ -16,8 +16,7 @@ open Fake.Api
 open Fake.BuildServer
 
 BuildServer.install [
-    AppVeyor.Installer
-    Travis.Installer
+    GitHubActions.Installer
 ]
 
 //-----------------------------------------------------------------------------
@@ -91,7 +90,7 @@ module dotnet =
         DotNet.exec cmdParam (sprintf "watch %s" program) args
 
     let tool optionConfig command args =
-        DotNet.exec (fun p -> { p with WorkingDirectory = toolsDir} |> optionConfig ) (sprintf "%s" command) args
+        DotNet.exec optionConfig (sprintf "%s" command) args
         |> failOnBadExitAndPrint
 
     let fantomas optionConfig args =
@@ -176,7 +175,7 @@ Target.create "DotnetTest" <| fun ctx ->
 
 Target.create "GenerateCoverageReport" <| fun _ ->
     let coverageReports =
-        !!"tests/**/coverage.*.xml"
+        !!"tests/**/coverage*.xml"
         |> String.concat ";"
     let sourceDirs =
         !! srcGlob
@@ -184,10 +183,10 @@ Target.create "GenerateCoverageReport" <| fun _ ->
         |> String.concat ";"
     let independentArgs =
             [
-                sprintf "-reports:%s"  coverageReports
-                sprintf "-targetdir:%s" coverageReportDir
+                sprintf "-reports:\"%s\""  coverageReports
+                sprintf "-targetdir:\"%s\"" coverageReportDir
                 // Add source dir
-                sprintf "-sourcedirs:%s" sourceDirs
+                sprintf "-sourcedirs:\"%s\"" sourceDirs
                 // Ignore Tests and if AltCover.Recorder.g sneaks in
                 sprintf "-assemblyfilters:\"%s\"" "-*.Tests;-AltCover.Recorder.g"
                 sprintf "-Reporttypes:%s" "Html"

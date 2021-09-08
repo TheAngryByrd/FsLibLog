@@ -224,9 +224,10 @@ var assemblies = [
   {
     "name": "FsLibLog",
     "classes": [
-      { "name": "FsLibLog.LogProvider", "rp": "FsLibLog_LogProvider.htm", "cl": 0, "ucl": 36, "cal": 36, "tl": 791, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 8, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.Providers", "rp": "FsLibLog_Providers.htm", "cl": 0, "ucl": 125, "cal": 125, "tl": 791, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 4, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.Types", "rp": "FsLibLog_Types.htm", "cl": 0, "ucl": 60, "cal": 60, "tl": 791, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.LogProvider", "rp": "FsLibLog_LogProvider.htm", "cl": 0, "ucl": 40, "cal": 40, "tl": 786, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 8, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Operators", "rp": "FsLibLog_Operators.htm", "cl": 0, "ucl": 5, "cal": 5, "tl": 786, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Providers", "rp": "FsLibLog_Providers.htm", "cl": 0, "ucl": 126, "cal": 126, "tl": 786, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 11, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Types", "rp": "FsLibLog_Types.htm", "cl": 0, "ucl": 60, "cal": 60, "tl": 786, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 2, "lch": [], "bch": [], "hc": [] },
       { "name": "System.AssemblyVersionInformation", "rp": "FsLibLog_AssemblyVersionInformation.htm", "cl": 0, "ucl": 0, "cal": 0, "tl": 0, "ct": "MethodCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
