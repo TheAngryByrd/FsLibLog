@@ -72,6 +72,12 @@ module ConsoleProvider =
                 threadSafeWriter.Post(color, formattedMsg)
                 true
 
+        let writeMessageFunc logger =
+            Func<LogLevel, MessageThunk, Exception option, obj array, bool>(
+                fun logLevel (messageFunc : MessageThunk) ``exception`` formatParams ->
+                    writeMessage logger logLevel messageFunc ``exception`` formatParams
+            )
+
         let addProp key value =
           propertyStack.Push(key, value)
           { new IDisposable with
@@ -80,7 +86,7 @@ module ConsoleProvider =
         interface ILogProvider with
 
             member this.GetLogger(name: string): Logger =
-                writeMessage name
+                writeMessageFunc name
             member this.OpenMappedContext(key: string) (value: obj) (destructure: bool): System.IDisposable =
                 addProp key value
             member this.OpenNestedContext(message: string): System.IDisposable =
