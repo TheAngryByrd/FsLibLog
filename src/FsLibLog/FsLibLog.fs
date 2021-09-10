@@ -1143,7 +1143,9 @@ module LogProvider =
         getModuleType quotation |> getLoggerByType
 
 
-
+// Can't access StackFrame in Fable
+// `GetCurrentMethod()` returns null in Fable
+#if !FABLE_COMPILER
     /// **Description**
     ///
     /// Creates a logger based on `Reflection.MethodBase.GetCurrentMethod` call.  This is only useful for calls within functions.  This does not protect against inlined functions.
@@ -1153,7 +1155,7 @@ module LogProvider =
     ///
     /// **Exceptions**
     ///
-    let inline getLoggerByFunc () =
+    let getLoggerByFunc () =
         let mi = Reflection.MethodBase.GetCurrentMethod()
 
         sprintf "%s.%s" mi.DeclaringType.FullName mi.Name
@@ -1171,3 +1173,4 @@ module LogProvider =
     let getCurrentLogger () =
         let stackFrame = StackFrame(2, false)
         getLoggerByType (stackFrame.GetMethod().DeclaringType)
+#endif
