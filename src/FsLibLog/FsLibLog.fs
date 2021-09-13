@@ -42,13 +42,44 @@ module Types =
 
     /// An interface wrapper for `Logger`. Useful when using depedency injection frameworks.
     type ILog =
-        abstract member Log : Logger
-        abstract member MappedContext : MappedContext
+        abstract member Log :  Logger
+        abstract member MappedContext :  MappedContext
+
+#if FABLE_COMPILER
+    // Fable doesn't support System.Collections.Generic.Stack, so this implementation (from FCS)
+    // is used instead.
+    type Stack<'a>()  =
+        let mutable contents = Array.zeroCreate<'a>(2)
+        let mutable count = 0
+
+        member buf.Ensure newSize =
+            let oldSize = contents.Length
+            if newSize > oldSize then
+                let old = contents
+                contents <- Array.zeroCreate (max newSize (oldSize * 2))
+                Array.blit old 0 contents 0 count
+
+        member buf.Count = count
+        member buf.Pop() =
+            let item = contents.[count - 1]
+            count <- count - 1
+            item
+
+        member buf.Peep() = contents.[count - 1]
+        member buf.Top(n) = [ for x in contents.[max 0 (count-n)..count - 1] -> x ] |> List.rev
+        member buf.Push(x) =
+            buf.Ensure(count + 1)
+            contents.[count] <- x
+            count <- count + 1
+
+        member buf.IsEmpty = (count = 0)
+#endif
 
     [<AutoOpen>]
     module Inner =
+#if !FABLE_COMPILER
         open System.Collections.Generic
-
+#endif
         type DisposableStack() =
             let stack = Stack<IDisposable>()
 
