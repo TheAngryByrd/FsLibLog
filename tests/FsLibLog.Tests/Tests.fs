@@ -58,6 +58,12 @@ let someFunction () =
     let logger = LogProvider.getLoggerByFunc()
     ()
 
+type Dog = {
+    Name : string
+    Age : int
+}
+
+
 
 [<Tests>]
 let tests =
@@ -161,6 +167,7 @@ let tests =
                 logger.fatal(Log.setMessage message)
                 let actual = provider.MessageThunk.Value()
                 Expect.equal actual "test message" ""
+
             testCase "setMessage operator (!!)" <| fun _ ->
                 let provider = getNewProvider()
                 let message = "test message"
@@ -168,6 +175,7 @@ let tests =
                 logger.fatal(!! message)
                 let actual = provider.MessageThunk.Value()
                 Expect.equal actual "test message" ""
+
             testCase "setMessageThunk" <| fun _ ->
                 let provider = getNewProvider()
                 let message = "test message"
@@ -175,6 +183,7 @@ let tests =
                 logger.fatal(Log.setMessageThunk (fun () -> message))
                 let actual = provider.MessageThunk.Value()
                 Expect.equal actual "test message" ""
+
             testCase "addParameter" <| fun _ ->
                 let provider = getNewProvider()
                 let parameter = "someParmeter"
@@ -182,6 +191,7 @@ let tests =
                 logger.fatal(Log.addParameter parameter)
                 let actual = provider.Parameters
                 Expect.equal actual [|parameter|] ""
+
             testCase "addParameter operator (>>!)" <| fun _ ->
                 let provider = getNewProvider()
                 let parameter = "someParmeter"
@@ -189,6 +199,7 @@ let tests =
                 logger.fatal(!! "" >>! parameter )
                 let actual = provider.Parameters
                 Expect.equal actual [|parameter|] ""
+
             testCase "addParameters" <| fun _ ->
                 let provider = getNewProvider()
                 let parameters = ["someParmeter"] |> List.map box
@@ -196,30 +207,35 @@ let tests =
                 logger.fatal(Log.addParameters parameters)
                 let actual = provider.Parameters
                 Expect.equal actual (Array.ofList parameters) ""
+
             testCase "addContext" <| fun _ ->
                 let provider = getNewProvider()
                 let parameter = "someParmeter"
                 let logger = LogProvider.getLoggerByName "addContext"
                 logger.fatal(Log.addContext "name" parameter)
                 Expect.contains provider.Contexts ("name",false, box parameter) ""
+
             testCase "addContext operator (>>!-)" <| fun _ ->
                 let provider = getNewProvider()
                 let parameter = "someParmeter"
                 let logger = LogProvider.getLoggerByName ">>!-"
                 logger.fatal(!!"" >>!- ("name",parameter))
                 Expect.contains provider.Contexts ("name",false, box parameter) ""
+
             testCase "addContextDestructured" <| fun _ ->
                 let provider = getNewProvider()
                 let parameter = "someParmeter"
                 let logger = LogProvider.getLoggerByName "addContextDestructured"
                 logger.fatal(Log.addContextDestructured "name" parameter)
                 Expect.contains provider.Contexts ("name",true, box parameter) ""
+
             testCase "addContextDestructured operator (>>!+)" <| fun _ ->
                 let provider = getNewProvider()
                 let parameter = "someParmeter"
                 let logger = LogProvider.getLoggerByName ">>!+"
                 logger.fatal(!!"" >>!+ ("name",parameter))
                 Expect.contains provider.Contexts ("name",true, box parameter) ""
+
             testCase "addException" <| fun _ ->
                 let provider = getNewProvider()
                 let ex = Exception()
@@ -227,6 +243,7 @@ let tests =
                 logger.fatal(Log.addException ex)
                 let actual = provider.Exception
                 Expect.equal actual (Some ex) ""
+
             testCase "addExn" <| fun _ ->
                 let provider = getNewProvider()
                 let ex = Exception()
@@ -234,6 +251,7 @@ let tests =
                 logger.fatal(Log.addExn ex)
                 let actual = provider.Exception
                 Expect.equal actual (Some ex) ""
+
             testCase "addExn operator (>>!!)" <| fun _ ->
                 let provider = getNewProvider()
                 let ex = Exception()
@@ -241,26 +259,52 @@ let tests =
                 logger.fatal(!! "" >>!! ex)
                 let actual = provider.Exception
                 Expect.equal actual (Some ex) ""
+
             testCase "openMappedContextDestucturable true" <| fun _ ->
                 let parameter = "some parameter"
                 let provider = getNewProvider()
                 use __ = LogProvider.openMappedContextDestucturable "name" parameter true
                 Expect.contains provider.Contexts ("name",true, box parameter) ""
+
             testCase "openMappedContextDestucturable false" <| fun _ ->
                 let parameter = "some parameter"
                 let provider = getNewProvider()
                 use __ = LogProvider.openMappedContextDestucturable "name" parameter false
                 Expect.contains provider.Contexts ("name",false, box parameter) ""
+
             testCase "openMappedContext" <| fun _ ->
                 let parameter = "some parameter"
                 let provider = getNewProvider()
                 use __ = LogProvider.openMappedContext "name" parameter
                 Expect.contains provider.Contexts ("name",false, box parameter) ""
+
+
             testCase "openNestedContext false" <| fun _ ->
                 let parameter = "some parameter"
                 let provider = getNewProvider()
                 use __ = LogProvider.openNestedContext parameter
                 Expect.contains provider.Contexts ("NDC",false, box parameter) ""
+
+            testCase "setMessageInterpolated simple" <| fun _ ->
+                let parameter = "problemChild123"
+                let provider = getNewProvider()
+
+                let logger = LogProvider.getLoggerByName "setMessageInterpolated"
+                logger.fatal(Log.setMessageInterpolated $"This {parameter:user} did something with this")
+                let actualMessage = provider.MessageThunk.Value()
+                Expect.equal actualMessage "This {user} did something with this" ""
+                Expect.contains provider.Contexts ("user",false, box parameter) ""
+
+            testCase "setMessageInterpolated object" <| fun _ ->
+                let parameter = {Name = "Mustard" ; Age = 42}
+                let provider = getNewProvider()
+
+                let logger = LogProvider.getLoggerByName "setMessageInterpolated"
+                logger.fatal(Log.setMessageInterpolated $"This {parameter:user} did something with this")
+                let actualMessage = provider.MessageThunk.Value()
+                Expect.equal actualMessage "This {user} did something with this" ""
+                Expect.contains provider.Contexts ("user",true, box parameter) ""
+
         ]
 
     ]

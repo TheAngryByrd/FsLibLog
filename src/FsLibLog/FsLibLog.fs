@@ -1,4 +1,5 @@
 namespace FsLibLog
+open System.Text.RegularExpressions
 
 
 [<AutoOpen>]
@@ -349,6 +350,43 @@ module Types =
         /// <returns>The amended log.</returns>
         let setLogLevel (logLevel : LogLevel) (log : Log) =
             { log with LogLevel = logLevel}
+
+        let private formatterRegex = Regex(@"(?<!{){(?<number>\d+)(?<columnFormat>:(?<format>[^}]+))?}(?!})", RegexOptions.Compiled)
+
+        let private isAnObject value = Convert.GetTypeCode(value) = TypeCode.Object
+
+        let setMessageInterpolated (message : FormattableString) (log : Log) =
+            let mutable messageFormat = message.Format
+            let args =
+                formatterRegex.Matches(messageFormat)
+                |> Seq.cast<Match>
+                |> Seq.map(fun m ->
+                    let number = Int32.Parse(m.Groups.["number"].Value)
+                    let formatGroup = m.Groups.["format"]
+                    let propertyValue = message.GetArgument(number)
+                    let propertyName = formatGroup.Value
+                    let columnFormatGroup = m.Groups.["columnFormat"]
+                    propertyName, propertyValue, columnFormatGroup.Index, columnFormatGroup.Length
+
+                )
+            args |> Seq.rev |> Seq.iter(fun (_,_,removeStart, removeLength) ->
+                messageFormat <- messageFormat.Remove(removeStart, removeLength)
+            )
+            let formatArgs = args |> Seq.map(fun (name,_,_,_) -> box $"{{{name}}}") |> Seq.toArray
+            messageFormat <- messageFormat.Replace("{{", "{{{{").Replace("}}", "}}}}")
+            messageFormat <- String.Format(messageFormat, args=formatArgs)
+            let addContexts args (log : Log) =
+                let addArgs =
+                    (id, args)
+                    ||> Seq.fold(fun state (name,value,_,_) ->
+                        let adder =
+                            if value |> isAnObject then addContextDestructured
+                            else addContext
+                        state >> adder name value)
+                addArgs log
+            log
+            |> setMessage messageFormat
+            |> addContexts args
 
 
 /// Provides operators to make writing logs more streamlined.
