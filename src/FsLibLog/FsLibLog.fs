@@ -369,25 +369,29 @@ module Types =
                     propertyName, propertyValue, columnFormatGroup.Index, columnFormatGroup.Length
 
                 )
+            // Reverse the args so we won't change the indexes earlier in the string
             args |> Seq.rev |> Seq.iter(fun (_,_,removeStart, removeLength) ->
-                messageFormat <- messageFormat.Remove(removeStart, removeLength)
+                if removeLength > 0 then
+                    messageFormat <- messageFormat.Remove(removeStart, removeLength)
             )
-            let formatArgs = args |> Seq.map(fun (name,_,_,_) -> box $"{{{name}}}") |> Seq.toArray
+            let namedArgs = args |> Seq.map(fun (name,_,_,_) -> box $"{{{name}}}") |> Seq.toArray
             messageFormat <- messageFormat.Replace("{{", "{{{{").Replace("}}", "}}}}")
-            messageFormat <- String.Format(messageFormat, args=formatArgs)
+            // Replace numbered args with named args from regex match
+            messageFormat <- String.Format(messageFormat, args=namedArgs)
             let addContexts args (log : Log) =
-                let addArgs =
+                let addArgsToContext =
                     (id, args)
                     ||> Seq.fold(fun state (name,value,_,_) ->
-                        let adder =
+                        let contextAdder =
                             if value |> isAnObject then addContextDestructured
                             else addContext
-                        state >> adder name value)
-                addArgs log
+                        state >> contextAdder name value)
+                addArgsToContext log
             log
             |> setMessage messageFormat
             |> addContexts args
 
+        let setMessageI (message : FormattableString) (log : Log) =  setMessageInterpolated message log
 
 /// Provides operators to make writing logs more streamlined.
 module Operators =
