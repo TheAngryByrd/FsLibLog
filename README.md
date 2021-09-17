@@ -16,7 +16,7 @@ Additionally, loggers aren't particularly friendly for F#, this sets out to reso
 
 #### Option 1
 
-Copy/paste [FsLibLog.fs](https://github.com/TheAngryByrd/FsLibLog/blob/master/src/FsLibLog/FsLibLog.fs) into your library 
+Copy/paste [FsLibLog.fs](https://github.com/TheAngryByrd/FsLibLog/blob/master/src/FsLibLog/FsLibLog.fs) into your library.
 
 #### Option 2
 
