@@ -305,6 +305,16 @@ let tests =
                 Expect.equal actualMessage "This {user} did something with this" ""
                 Expect.contains provider.Contexts ("user",true, box parameter) ""
 
+            testCase "setMessageInterpolated anonymous record" <| fun _ ->
+                let parameter = {|Foo = 123|}
+                let provider = getNewProvider()
+                let logger = LogProvider.getLoggerByName "setMessageInterpolated"
+                logger.fatal(Log.setMessageInterpolated $"This {parameter:user} did something with this")
+                let actualMessage = provider.MessageThunk.Value()
+                Expect.equal actualMessage "This {user} did something with this" ""
+                provider.Contexts |> Seq.iter(printfn "%A")
+                Expect.contains provider.Contexts ("user",true, box parameter) ""
+
         ]
 
     ]
