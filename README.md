@@ -190,6 +190,30 @@ module Say =
 
 ---
 
+## String Interpolation
+
+This allows for [string interpolation](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/interpolated-strings) with a special syntax to be convertable to [Message Templates](https://messagetemplates.org/) used in underlying providers (such as Serilog).
+
+Typically when one uses string interpolation it works as such:
+
+```fsharp
+let favoriteCartoon = "Captain Planet"
+let dayItsOn = "Saturday"
+printfn $"My favorite cartoon is {favoriteCartoon} and airs on {dayItsOn}"
+```
+
+F# compiler will create a [FormattableString](https://docs.microsoft.com/en-us/dotnet/api/system.formattablestring?view=net-5.0) where it's `Format` property looks like `My favorite cartoon is {0} and airs on {1}` and the `GetArguments()` are `[| "Captain Planet";  "Saturday" |]`.  As you can see, `FormattableString` doesn't have the named parameters that `Message Templates` would want.  To make this work the way we want we need to introduce a specific syntax.
+
+```fsharp
+let favoriteCartoon = "Captain Planet"
+let dayItsOn = "Saturday"
+printfn $"My favorite cartoon is {favoriteCartoon:CartoonShow} and airs on {dayItsOn:DayAired}"
+```
+
+`setMessageInterpolated` will make the template look like `My favorite cartoon is {CartoonShow} and airs on {DayAired}`.  This will replace the number arguments with the names after the colon within the interpolated string. This makes a usable message template.
+
+- Why aren't we just trying to get the name of the variable/value? Needing to specify dedicate names _is a good thing_ since refactoring your variable names can have drastic effects on your logging queries. Explicit naming separates these concerns.
+
 ## Builds
 
 GitHub Actions |
