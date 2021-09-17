@@ -1,8 +1,16 @@
 # FsLibLog
 
-FsLibLog is a single file you can copy paste or add through [Paket Github dependencies](https://fsprojects.github.io/Paket/github-dependencies.html) to provide your F# library with a logging abstraction.  This is a port of the C# [LibLog](https://github.com/damianh/LibLog).
+## What is this?
 
-## Getting started
+FsLibLog is a single file you can copy paste or add through [Paket Github dependencies](https://fsprojects.github.io/Paket/github-dependencies.html) to provide your F# library with a logging abstraction. This is a port of the C# [LibLog](https://github.com/damianh/LibLog).
+
+## Why does this exist?
+
+When creating a library for .NET, you typically do not want to depend on a logging framework or abstraction. Depending on a logging framework forces your consumers to use that framework, which is not ideal. Depending on an abstraction _can_ work but you can run into the [diamond dependency](https://docs.microsoft.com/en-us/dotnet/standard/library-guidance/dependencies#diamond-dependencies) problem. Since this is just a file you compile into your library, no dependency is taken and is transparent to your consumers.
+
+Additionally, loggers aren't particularly friendly for F#, this sets out to resolve that.
+
+## How to get started
 
 ### 1. Put the file into your project
 
@@ -184,9 +192,21 @@ module Say =
 
 ```
 
-## Currently supported providers
+## Log Providers
+
+Providers are the actual logging framework that sends the logs to some destination (console, file, logging service). FsLibLog uses reflection to inspect the running application and wire these up telling FsLibLog to do it.
+
+### Currently supported provider
 
 - [Serilog](https://github.com/serilog/serilog)
+
+### Custom Providers
+
+You can implement and teach FsLibLog about your own custom provider if one is not listed. You have to do 2 things:
+
+1. You have to implement the `ILogProvider` interface. [Example Implemenation](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/ConsoleExample/Program.fs#L5-L90)
+2. You have to tell FsLibLog to use it. [Example calling FsLibLog.LogProvider.setLoggerProvider](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/ConsoleExample/Program.fs#L94)
+  a. One downside to this is you need to do this for every library your application consumes that uses FsLiblog.
 
 ---
 
