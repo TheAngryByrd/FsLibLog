@@ -1,16 +1,19 @@
 namespace FsLibLog
 
+open System.Text.RegularExpressions
+
 
 [<AutoOpen>]
 module Types =
     open System
+
     type LogLevel =
-    | Trace = 0
-    | Debug = 1
-    | Info = 2
-    | Warn = 3
-    | Error = 4
-    | Fatal = 5
+        | Trace = 0
+        | Debug = 1
+        | Info = 2
+        | Warn = 3
+        | Error = 4
+        | Fatal = 5
 
     /// An optional message thunk.
     ///
@@ -23,28 +26,24 @@ module Types =
     type MappedContext = string -> obj -> bool -> IDisposable
 
     /// Type representing a Log
-    [<NoEquality;NoComparison>]
-    type Log = {
-        LogLevel : LogLevel
-        Message : MessageThunk
-        Exception : exn option
-        Parameters : obj list
-        AdditionalNamedParameters : ((string*obj*bool) list)
-    }
-        with
-            static member StartLogLevel (logLevel : LogLevel) =
-                {
-                    LogLevel = logLevel
-                    Message = None
-                    Exception = None
-                    Parameters = List.empty
-                    AdditionalNamedParameters = List.empty
-                }
+    [<NoEquality; NoComparison>]
+    type Log =
+        { LogLevel: LogLevel
+          Message: MessageThunk
+          Exception: exn option
+          Parameters: obj list
+          AdditionalNamedParameters: ((string * obj * bool) list) }
+        static member StartLogLevel(logLevel: LogLevel) =
+            { LogLevel = logLevel
+              Message = None
+              Exception = None
+              Parameters = List.empty
+              AdditionalNamedParameters = List.empty }
 
     /// An interface wrapper for `Logger`. Useful when using depedency injection frameworks.
     type ILog =
-        abstract member Log :  Logger
-        abstract member MappedContext :  MappedContext
+        abstract member Log : Logger
+        abstract member MappedContext : MappedContext
 
     [<AutoOpen>]
     module Inner =
@@ -54,14 +53,14 @@ module Types =
             let stack = Stack<IDisposable>()
 
             interface IDisposable with
-                member __.Dispose () =
+                member __.Dispose() =
                     while stack.Count > 0 do
                         stack.Pop().Dispose()
 
-            member __.Push (item : IDisposable) = stack.Push item
-            member __.Push (items : IDisposable list) = items |> List.iter stack.Push
+            member __.Push(item: IDisposable) = stack.Push item
+            member __.Push(items: IDisposable list) = items |> List.iter stack.Push
 
-            static member Create (items : IDisposable list) =
+            static member Create(items: IDisposable list) =
                 let ds = new DisposableStack()
                 ds.Push items
                 ds
@@ -77,10 +76,10 @@ module Types =
             ///
             /// **Output Type**
             ///   * `bool`
-            member logger.fromLog (log : Log) =
+            member logger.fromLog(log: Log) =
                 use __ =
                     log.AdditionalNamedParameters
-                    |> List.map(fun (key,value, destructure) -> logger.MappedContext key value destructure)
+                    |> List.map (fun (key, value, destructure) -> logger.MappedContext key value destructure)
                     // This stack is important, it causes us to unwind as if you have multiple uses in a row
                     |> DisposableStack.Create
 
@@ -97,7 +96,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `bool`
-            member logger.fatal' (logConfig : Log -> Log) =
+            member logger.fatal'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Fatal
                 |> logConfig
                 |> logger.fromLog
@@ -111,8 +110,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `unit`
-            member logger.fatal (logConfig : Log -> Log) =
-                logger.fatal' logConfig |> ignore
+            member logger.fatal(logConfig: Log -> Log) = logger.fatal' logConfig |> ignore
 
             /// **Description**
             ///
@@ -123,7 +121,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `bool`
-            member logger.error' (logConfig : Log -> Log) =
+            member logger.error'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Error
                 |> logConfig
                 |> logger.fromLog
@@ -137,8 +135,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `unit`
-            member logger.error (logConfig : Log -> Log) =
-                logger.error' logConfig |> ignore
+            member logger.error(logConfig: Log -> Log) = logger.error' logConfig |> ignore
 
             /// **Description**
             ///
@@ -149,7 +146,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `bool`
-            member logger.warn' (logConfig : Log -> Log) =
+            member logger.warn'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Warn
                 |> logConfig
                 |> logger.fromLog
@@ -163,8 +160,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `unit`
-            member logger.warn (logConfig : Log -> Log) =
-                logger.warn' logConfig |> ignore
+            member logger.warn(logConfig: Log -> Log) = logger.warn' logConfig |> ignore
 
             /// **Description**
             ///
@@ -175,7 +171,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `bool`
-            member logger.info' (logConfig : Log -> Log) =
+            member logger.info'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Info
                 |> logConfig
                 |> logger.fromLog
@@ -189,8 +185,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `unit`
-            member logger.info (logConfig : Log -> Log) =
-                logger.info' logConfig |> ignore
+            member logger.info(logConfig: Log -> Log) = logger.info' logConfig |> ignore
 
             /// **Description**
             ///
@@ -201,7 +196,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `bool`
-            member logger.debug' (logConfig : Log -> Log) =
+            member logger.debug'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Debug
                 |> logConfig
                 |> logger.fromLog
@@ -215,8 +210,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `unit`
-            member logger.debug (logConfig : Log -> Log) =
-                logger.debug' logConfig |> ignore
+            member logger.debug(logConfig: Log -> Log) = logger.debug' logConfig |> ignore
 
             /// **Description**
             ///
@@ -227,7 +221,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `bool`
-            member logger.trace' (logConfig : Log -> Log) =
+            member logger.trace'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Trace
                 |> logConfig
                 |> logger.fromLog
@@ -241,8 +235,7 @@ module Types =
             ///
             /// **Output Type**
             ///   * `unit`
-            member logger.trace (logConfig : Log -> Log) =
-                logger.trace' logConfig |> ignore
+            member logger.trace(logConfig: Log -> Log) = logger.trace' logConfig |> ignore
 
 
     /// An interface for retrieving a concrete logger such as Serilog, Nlog, etc.
@@ -259,8 +252,9 @@ module Types =
         /// <param name="message">The message to set for the log.</param>
         /// <param name="log">The log to amend.</param>
         /// <returns>The amended log.</returns>
-        let setMessage (message : string) (log : Log) =
-            { log with Message = Some (fun () -> message) }
+        let setMessage (message: string) (log: Log) =
+            { log with
+                  Message = Some(fun () -> message) }
 
         /// <summary>
         /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with a message thunk.  Useful for "expensive" string construction scenarios.
@@ -268,7 +262,7 @@ module Types =
         /// <param name="messageThunk">The function that generates a message to add to a Log.</param>
         /// <param name="log">The log to amend.</param>
         /// <returns>The amended log.</returns>
-        let setMessageThunk (messageThunk : unit -> string) (log : Log) =
+        let setMessageThunk (messageThunk: unit -> string) (log: Log) =
             { log with Message = Some messageThunk }
 
         /// <summary>
@@ -277,8 +271,9 @@ module Types =
         /// <param name="param">The value to add to the log</param>
         /// <param name="log">The log to amend.</param>
         /// <returns>The amended log.</returns>
-        let addParameter (param : 'a) (log : Log) =
-            { log with Parameters = List.append log.Parameters [(box param)] }
+        let addParameter (param: 'a) (log: Log) =
+            { log with
+                  Parameters = List.append log.Parameters [ (box param) ] }
 
         /// <summary>
         /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with a list of parameters.
@@ -286,11 +281,11 @@ module Types =
         /// <param name="params">The values to add to the log, in the form of an `obj list`.</param>
         /// <param name="log">The log to amend.</param>
         /// <returns>The amended log.</returns>
-        let addParameters (``params`` : obj list) (log : Log) =
-            let ``params`` =
-                ``params``
-                |> List.map box
-            { log with Parameters = log.Parameters @ ``params`` }
+        let addParameters (``params``: obj list) (log: Log) =
+            let ``params`` = ``params`` |> List.map box
+
+            { log with
+                  Parameters = log.Parameters @ ``params`` }
 
 
 
@@ -303,8 +298,9 @@ module Types =
         /// <param name="value">The value of the parameter to add to the log.</param>
         /// <param name="log">The log to amend.</param>
         /// <returns>The amended log.</returns>
-        let addContext (key : string) (value : obj) (log : Log) =
-            { log with AdditionalNamedParameters = List.append log.AdditionalNamedParameters [key, (box value), false] }
+        let addContext (key: string) (value: obj) (log: Log) =
+            { log with
+                  AdditionalNamedParameters = List.append log.AdditionalNamedParameters [ key, (box value), false ] }
 
 
         /// **Description**
@@ -319,8 +315,9 @@ module Types =
         /// <param name="value">The value of the parameter to add to the log.</param>
         /// <param name="log">The log to amend.</param>
         /// <returns>The amended log.</returns>
-        let addContextDestructured (key : string) (value : obj) (log : Log) =
-            { log with AdditionalNamedParameters = List.append log.AdditionalNamedParameters [key, (box value),true] }
+        let addContextDestructured (key: string) (value: obj) (log: Log) =
+            { log with
+                  AdditionalNamedParameters = List.append log.AdditionalNamedParameters [ key, (box value), true ] }
 
 
         /// <summary>
@@ -329,8 +326,9 @@ module Types =
         /// <param name="exception">The exception to add to the log.</param>
         /// <param name="log">The log to amend.</param>
         /// <returns>The amended log.</returns>
-        let addException (``exception`` : exn) (log : Log) =
-            { log with Exception = Option.ofObj ``exception``}
+        let addException (``exception``: exn) (log: Log) =
+            { log with
+                  Exception = Option.ofObj ``exception`` }
 
         /// <summary>
         /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with an <see cref="T:System.Exception">exn</see>. Handles nulls.
@@ -338,18 +336,94 @@ module Types =
         /// <param name="exception">The exception to add to the log.</param>
         /// <param name="log">The log to amend.</param>
         /// <returns>The amended log.</returns>
-        let addExn (``exception`` : exn) (log : Log) =
-            addException ``exception`` log
+        let addExn (``exception``: exn) (log: Log) = addException ``exception`` log
 
         /// <summary>
-        /// Amends a `Log` with a given `LogLevel`
+        /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with a given <see cref="T:FsLibLog.Types.LogLevel">LogLevel</see>
         /// </summary>
         /// <param name="logLevel">The level to set for the log.</param>
         /// <param name="log">The log to amend.</param>
         /// <returns>The amended log.</returns>
-        let setLogLevel (logLevel : LogLevel) (log : Log) =
-            { log with LogLevel = logLevel}
+        let setLogLevel (logLevel: LogLevel) (log: Log) = { log with LogLevel = logLevel }
 
+        let private formatterRegex =
+            Regex(@"(?<!{){(?<number>\d+)(?<columnFormat>:(?<format>[^}]+))?}(?!})", RegexOptions.Compiled)
+
+        let private isAnObject value =
+            Convert.GetTypeCode(value) = TypeCode.Object
+
+        /// <summary>
+        /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with a given interpolated string. This will generate a message template from a special syntax within the interpolation. The syntax for the interplated string is <code> $"I want to log {myVariable:MyLogVariableName}". </code>
+        ///
+        /// This would be equivalent of calling <code>(setMessage "I want to log {MyLogVariableName}" >> addContextDestructured "MyLogVariable" myVariable)</code>
+        /// </summary>
+        /// <param name="message">An interpolated string</param>
+        /// <param name="log">The log to amend.</param>
+        /// <returns>The amended log.</returns>
+        let setMessageInterpolated (message: FormattableString) (log: Log) =
+            let mutable messageFormat = message.Format
+
+            let args =
+                formatterRegex.Matches(messageFormat)
+                |> Seq.cast<Match>
+                |> Seq.map
+                    (fun m ->
+                        let number = Int32.Parse(m.Groups.["number"].Value)
+                        let formatGroup = m.Groups.["format"]
+                        let propertyValue = message.GetArgument(number)
+                        let propertyName = formatGroup.Value
+                        let columnFormatGroup = m.Groups.["columnFormat"]
+                        propertyName, propertyValue, columnFormatGroup.Index, columnFormatGroup.Length
+
+                        )
+            // Reverse the args so we won't change the indexes earlier in the string
+            args
+            |> Seq.rev
+            |> Seq.iter
+                (fun (_, _, removeStart, removeLength) ->
+                    if removeLength > 0 then
+                        messageFormat <- messageFormat.Remove(removeStart, removeLength))
+
+            let namedArgs =
+                args
+                |> Seq.map (fun (name, _, _, _) -> box $"{{{name}}}")
+                |> Seq.toArray
+
+            messageFormat <-
+                messageFormat
+                    .Replace("{{", "{{{{")
+                    .Replace("}}", "}}}}")
+            // Replace numbered args with named args from regex match
+            messageFormat <- String.Format(messageFormat, args = namedArgs)
+
+            let addContexts args (log: Log) =
+                let addArgsToContext =
+                    (id, args)
+                    ||> Seq.fold
+                            (fun state (name, value, _, _) ->
+                                let contextAdder =
+                                    if value |> isAnObject then
+                                        addContextDestructured
+                                    else
+                                        addContext
+
+                                state >> contextAdder name value)
+
+                addArgsToContext log
+
+            log
+            |> setMessage messageFormat
+            |> addContexts args
+
+        /// <summary>
+        /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with a given interpolated string. This will generate a message template from a special syntax within the interpolation. The syntax for the interplated string is <code> $"I want to log {myVariable:MyLogVariableName}". </code>
+        ///
+        /// This would be equivalent of calling <code>(setMessage "I want to log {MyLogVariableName}" >> addContextDestructured "MyLogVariable" myVariable)</code>
+        /// </summary>
+        /// <param name="message">An interpolated string</param>
+        /// <param name="log">The log to amend.</param>
+        /// <returns>The amended log.</returns>
+        let setMessageI (message: FormattableString) (log: Log) = setMessageInterpolated message log
 
 /// Provides operators to make writing logs more streamlined.
 module Operators =
@@ -391,7 +465,8 @@ module Operators =
     /// <param name="key">The name for the parameter.</param>
     /// <param name="value">The value for the parameter.</param>
     /// <returns>The amended log with the parameter added.</returns>
-    let (>>!+) log (key, value) = log >> Log.addContextDestructured key value
+    let (>>!+) log (key, value) =
+        log >> Log.addContextDestructured key value
 
     /// <summary>
     /// Amends a Log with an exn. Handles nulls.
@@ -409,10 +484,8 @@ module Providers =
         open System
         open System.Linq.Expressions
 
-        let getLogManagerType () =
-            Type.GetType("Serilog.Log, Serilog")
-        let isAvailable () =
-            getLogManagerType () |> isNull |> not
+        let getLogManagerType () = Type.GetType("Serilog.Log, Serilog")
+        let isAvailable () = getLogManagerType () |> isNull |> not
 
         let getPushProperty () =
 
@@ -422,68 +495,111 @@ module Providers =
                 |> Option.defaultWith (fun () -> Type.GetType("Serilog.Context.LogContext, Serilog.FullNetFx"))
 
             ()
-            let pushPropertyMethod =
-                ndcContextType.GetMethod( "PushProperty",
-                    [|typedefof<string>; typedefof<obj>; typedefof<bool>|])
 
-            let nameParam = Expression.Parameter(typedefof<string>, "name")
-            let valueParam = Expression.Parameter(typedefof<obj>, "value")
-            let destructureObjectParam = Expression.Parameter(typedefof<bool>, "destructureObjects");
+            let pushPropertyMethod =
+                ndcContextType.GetMethod(
+                    "PushProperty",
+                    [| typedefof<string>
+                       typedefof<obj>
+                       typedefof<bool> |]
+                )
+
+            let nameParam =
+                Expression.Parameter(typedefof<string>, "name")
+
+            let valueParam =
+                Expression.Parameter(typedefof<obj>, "value")
+
+            let destructureObjectParam =
+                Expression.Parameter(typedefof<bool>, "destructureObjects")
+
             let pushPropertyMethodCall =
-                Expression.Call(null, pushPropertyMethod, nameParam, valueParam, destructureObjectParam);
+                Expression.Call(null, pushPropertyMethod, nameParam, valueParam, destructureObjectParam)
+
             let pushProperty =
                 Expression
                     .Lambda<Func<string, obj, bool, IDisposable>>(
                         pushPropertyMethodCall,
                         nameParam,
                         valueParam,
-                        destructureObjectParam)
-                    .Compile();
+                        destructureObjectParam
+                    )
+                    .Compile()
 
             fun key value destructure -> pushProperty.Invoke(key, value, destructure)
 
 
         let getForContextMethodCall () =
             let logManagerType = getLogManagerType ()
-            let method = logManagerType.GetMethod("ForContext", [|typedefof<string>; typedefof<obj>; typedefof<bool>|])
-            let propertyNameParam = Expression.Parameter(typedefof<string>, "propertyName")
-            let valueParam = Expression.Parameter(typedefof<obj>, "value")
-            let destructureObjectsParam = Expression.Parameter(typedefof<bool>, "destructureObjects")
-            let exrs : Expression []=
-                [|
-                    propertyNameParam
-                    valueParam
-                    destructureObjectsParam
-                |]
-            let methodCall =
-                Expression.Call(null, method, exrs)
+
+            let method =
+                logManagerType.GetMethod(
+                    "ForContext",
+                    [| typedefof<string>
+                       typedefof<obj>
+                       typedefof<bool> |]
+                )
+
+            let propertyNameParam =
+                Expression.Parameter(typedefof<string>, "propertyName")
+
+            let valueParam =
+                Expression.Parameter(typedefof<obj>, "value")
+
+            let destructureObjectsParam =
+                Expression.Parameter(typedefof<bool>, "destructureObjects")
+
+            let exrs: Expression [] =
+                [| propertyNameParam
+                   valueParam
+                   destructureObjectsParam |]
+
+            let methodCall = Expression.Call(null, method, exrs)
+
             let func =
-                Expression.Lambda<Func<string, obj, bool, obj>>(
-                    methodCall,
-                    propertyNameParam,
-                    valueParam,
-                    destructureObjectsParam).Compile()
+                Expression
+                    .Lambda<Func<string, obj, bool, obj>>(
+                        methodCall,
+                        propertyNameParam,
+                        valueParam,
+                        destructureObjectsParam
+                    )
+                    .Compile()
+
             fun name -> func.Invoke("SourceContext", name, false)
 
-        [<NoEquality;NoComparison>]
-        type SerilogGateway = {
-            Write : obj -> obj -> string -> obj [] -> unit
-            WriteException : obj -> obj -> exn -> string -> obj [] -> unit
-            IsEnabled : obj -> obj -> bool
-            TranslateLevel : LogLevel -> obj
-        } with
-            static member Create () =
-                let logEventLevelType = Type.GetType("Serilog.Events.LogEventLevel, Serilog")
+        [<NoEquality; NoComparison>]
+        type SerilogGateway =
+            { Write: obj -> obj -> string -> obj [] -> unit
+              WriteException: obj -> obj -> exn -> string -> obj [] -> unit
+              IsEnabled: obj -> obj -> bool
+              TranslateLevel: LogLevel -> obj }
+            static member Create() =
+                let logEventLevelType =
+                    Type.GetType("Serilog.Events.LogEventLevel, Serilog")
+
                 if (logEventLevelType |> isNull) then
                     failwith ("Type Serilog.Events.LogEventLevel was not found.")
 
-                let debugLevel = Enum.Parse(logEventLevelType, "Debug", false)
-                let errorLevel = Enum.Parse(logEventLevelType, "Error", false)
-                let fatalLevel = Enum.Parse(logEventLevelType, "Fatal", false)
-                let informationLevel = Enum.Parse(logEventLevelType, "Information", false)
-                let verboseLevel = Enum.Parse(logEventLevelType, "Verbose", false)
-                let warningLevel = Enum.Parse(logEventLevelType, "Warning", false)
-                let translateLevel (level : LogLevel) =
+                let debugLevel =
+                    Enum.Parse(logEventLevelType, "Debug", false)
+
+                let errorLevel =
+                    Enum.Parse(logEventLevelType, "Error", false)
+
+                let fatalLevel =
+                    Enum.Parse(logEventLevelType, "Fatal", false)
+
+                let informationLevel =
+                    Enum.Parse(logEventLevelType, "Information", false)
+
+                let verboseLevel =
+                    Enum.Parse(logEventLevelType, "Verbose", false)
+
+                let warningLevel =
+                    Enum.Parse(logEventLevelType, "Warning", false)
+
+                let translateLevel (level: LogLevel) =
                     match level with
                     | LogLevel.Fatal -> fatalLevel
                     | LogLevel.Error -> errorLevel
@@ -494,42 +610,67 @@ module Providers =
                     | _ -> debugLevel
 
                 let loggerType = Type.GetType("Serilog.ILogger, Serilog")
-                if (loggerType |> isNull) then failwith ("Type Serilog.ILogger was not found.")
-                let isEnabledMethodInfo = loggerType.GetMethod("IsEnabled", [|logEventLevelType|])
+
+                if (loggerType |> isNull) then
+                    failwith ("Type Serilog.ILogger was not found.")
+
+                let isEnabledMethodInfo =
+                    loggerType.GetMethod("IsEnabled", [| logEventLevelType |])
+
                 let instanceParam = Expression.Parameter(typedefof<obj>)
-                let instanceCast = Expression.Convert(instanceParam, loggerType)
+
+                let instanceCast =
+                    Expression.Convert(instanceParam, loggerType)
+
                 let levelParam = Expression.Parameter(typedefof<obj>)
-                let levelCast = Expression.Convert(levelParam, logEventLevelType)
-                let isEnabledMethodCall = Expression.Call(instanceCast, isEnabledMethodInfo, levelCast)
+
+                let levelCast =
+                    Expression.Convert(levelParam, logEventLevelType)
+
+                let isEnabledMethodCall =
+                    Expression.Call(instanceCast, isEnabledMethodInfo, levelCast)
+
                 let isEnabled =
                     Expression
-                        .Lambda<Func<obj, obj, bool>>(isEnabledMethodCall, instanceParam, levelParam).Compile()
+                        .Lambda<Func<obj, obj, bool>>(isEnabledMethodCall, instanceParam, levelParam)
+                        .Compile()
 
                 let writeMethodInfo =
-                    loggerType.GetMethod("Write", [|logEventLevelType; typedefof<string>; typedefof<obj []>|])
+                    loggerType.GetMethod(
+                        "Write",
+                        [| logEventLevelType
+                           typedefof<string>
+                           typedefof<obj []> |]
+                    )
+
                 let messageParam = Expression.Parameter(typedefof<string>)
                 let propertyValuesParam = Expression.Parameter(typedefof<obj []>)
+
                 let writeMethodExp =
-                    Expression.Call(
-                        instanceCast,
-                        writeMethodInfo,
-                        levelCast,
-                        messageParam,
-                        propertyValuesParam)
+                    Expression.Call(instanceCast, writeMethodInfo, levelCast, messageParam, propertyValuesParam)
+
                 let expression =
                     Expression.Lambda<Action<obj, obj, string, obj []>>(
                         writeMethodExp,
                         instanceParam,
                         levelParam,
                         messageParam,
-                        propertyValuesParam)
+                        propertyValuesParam
+                    )
+
                 let write = expression.Compile()
 
                 let writeExceptionMethodInfo =
                     loggerType.GetMethod(
                         "Write",
-                        [| logEventLevelType; typedefof<exn>; typedefof<string>; typedefof<obj []>|])
+                        [| logEventLevelType
+                           typedefof<exn>
+                           typedefof<string>
+                           typedefof<obj []> |]
+                    )
+
                 let exceptionParam = Expression.Parameter(typedefof<exn>)
+
                 let writeMethodExp =
                     Expression.Call(
                         instanceCast,
@@ -537,52 +678,62 @@ module Providers =
                         levelCast,
                         exceptionParam,
                         messageParam,
-                        propertyValuesParam)
+                        propertyValuesParam
+                    )
+
                 let writeException =
-                    Expression.Lambda<Action<obj, obj, exn, string, obj []>>(
-                        writeMethodExp,
-                        instanceParam,
-                        levelParam,
-                        exceptionParam,
-                        messageParam,
-                        propertyValuesParam).Compile()
-                {
-                    Write = (fun logger level message formattedParmeters -> write.Invoke(logger,level,message,formattedParmeters))
-                    WriteException = fun logger level ex message formattedParmeters -> writeException.Invoke(logger,level,ex,message,formattedParmeters)
-                    IsEnabled = fun logger level -> isEnabled.Invoke(logger,level)
-                    TranslateLevel = translateLevel
-                }
+                    Expression
+                        .Lambda<Action<obj, obj, exn, string, obj []>>(
+                            writeMethodExp,
+                            instanceParam,
+                            levelParam,
+                            exceptionParam,
+                            messageParam,
+                            propertyValuesParam
+                        )
+                        .Compile()
 
-        type private SerigLogProvider () =
+                { Write =
+                      (fun logger level message formattedParmeters ->
+                          write.Invoke(logger, level, message, formattedParmeters))
+                  WriteException =
+                      fun logger level ex message formattedParmeters ->
+                          writeException.Invoke(logger, level, ex, message, formattedParmeters)
+                  IsEnabled = fun logger level -> isEnabled.Invoke(logger, level)
+                  TranslateLevel = translateLevel }
+
+        type private SerigLogProvider() =
             let getLoggerByName = getForContextMethodCall ()
-            let pushProperty = getPushProperty()
-            let serilogGatewayInit = lazy(SerilogGateway.Create())
+            let pushProperty = getPushProperty ()
+            let serilogGatewayInit = lazy (SerilogGateway.Create())
 
-            let writeMessage logger logLevel (messageFunc : MessageThunk) ``exception`` formatParams =
+            let writeMessage logger logLevel (messageFunc: MessageThunk) ``exception`` formatParams =
                 let serilogGateway = serilogGatewayInit.Value
                 let translatedValue = serilogGateway.TranslateLevel logLevel
+
                 match messageFunc with
                 | None -> serilogGateway.IsEnabled logger translatedValue
-                | Some _ when  serilogGateway.IsEnabled logger translatedValue |> not -> false
+                | Some _ when
+                    serilogGateway.IsEnabled logger translatedValue
+                    |> not
+                    ->
+                    false
                 | Some m ->
                     match ``exception`` with
-                    | Some ex ->
-                        serilogGateway.WriteException logger translatedValue ex (m()) formatParams
-                    | None ->
-                        serilogGateway.Write logger translatedValue (m()) formatParams
+                    | Some ex -> serilogGateway.WriteException logger translatedValue ex (m ()) formatParams
+                    | None -> serilogGateway.Write logger translatedValue (m ()) formatParams
+
                     true
 
             interface ILogProvider with
-                member this.GetLogger(name: string): Logger =
-                    getLoggerByName name
-                    |> writeMessage
-                member this.OpenMappedContext(key: string) (value: obj) (destructure: bool): IDisposable =
-                    pushProperty key value destructure
-                member this.OpenNestedContext(message: string): IDisposable =
-                    pushProperty "NDC" message false
+                member this.GetLogger(name: string) : Logger = getLoggerByName name |> writeMessage
 
-        let create () =
-            SerigLogProvider () :> ILogProvider
+                member this.OpenMappedContext (key: string) (value: obj) (destructure: bool) : IDisposable =
+                    pushProperty key value destructure
+
+                member this.OpenNestedContext(message: string) : IDisposable = pushProperty "NDC" message false
+
+        let create () = SerigLogProvider() :> ILogProvider
 
 
 
@@ -595,23 +746,21 @@ module LogProvider =
 
     let mutable private currentLogProvider = None
 
-    let private knownProviders = [
-        (SerilogProvider.isAvailable , SerilogProvider.create)
-    ]
+    let private knownProviders =
+        [ (SerilogProvider.isAvailable, SerilogProvider.create) ]
 
     /// Greedy search for first available LogProvider. Order of known providers matters.
-    let private resolvedLogger = lazy (
-        knownProviders
-        |> Seq.tryFind(fun (isAvailable,_) -> isAvailable ())
-        |> Option.map(fun (_, create) -> create())
-    )
+    let private resolvedLogger =
+        lazy
+            (knownProviders
+             |> Seq.tryFind (fun (isAvailable, _) -> isAvailable ())
+             |> Option.map (fun (_, create) -> create ()))
 
     let private noopLogger _ _ _ _ = false
 
-    let private noopDisposable = {
-        new IDisposable with
-            member __.Dispose() = ()
-    }
+    let private noopDisposable =
+        { new IDisposable with
+            member __.Dispose() = () }
 
     /// **Description**
     ///
@@ -622,8 +771,7 @@ module LogProvider =
     ///
     /// **Output Type**
     ///   * `unit`
-    let setLoggerProvider (logProvider : ILogProvider) =
-        currentLogProvider <- Some logProvider
+    let setLoggerProvider (logProvider: ILogProvider) = currentLogProvider <- Some logProvider
 
     let getCurrentLogProvider () =
         match currentLogProvider with
@@ -641,13 +789,12 @@ module LogProvider =
     ///
     /// **Output Type**
     ///   * `IDisposable`
-    let openMappedContextDestucturable (key : string) (value : obj) (destructureObjects : bool) =
-        let provider  = getCurrentLogProvider ()
+    let openMappedContextDestucturable (key: string) (value: obj) (destructureObjects: bool) =
+        let provider = getCurrentLogProvider ()
+
         match provider with
-        | Some p ->
-            p.OpenMappedContext key value destructureObjects
-        | None ->
-            noopDisposable
+        | Some p -> p.OpenMappedContext key value destructureObjects
+        | None -> noopDisposable
 
     /// **Description**
     ///
@@ -659,7 +806,7 @@ module LogProvider =
     ///
     /// **Output Type**
     ///   * `IDisposable`
-    let openMappedContext (key : string) (value : obj) =
+    let openMappedContext (key: string) (value: obj) =
         //TODO: We should try to find out if the value is a primitive
         openMappedContextDestucturable key value false
 
@@ -672,13 +819,12 @@ module LogProvider =
     ///
     /// **Output Type**
     ///   * `IDisposable`
-    let openNestedContext (value : string) =
-        let provider  = getCurrentLogProvider ()
+    let openNestedContext (value: string) =
+        let provider = getCurrentLogProvider ()
+
         match provider with
-        | Some p ->
-            p.OpenNestedContext value
-        | None ->
-            noopDisposable
+        | Some p -> p.OpenNestedContext value
+        | None -> noopDisposable
 
     /// **Description**
     ///
@@ -689,7 +835,7 @@ module LogProvider =
     ///
     /// **Output Type**
     ///   * `ILog`
-    let getLoggerByName (name : string) =
+    let getLoggerByName (name: string) =
         let loggerProvider = getCurrentLogProvider ()
 
         let logFunc =
@@ -697,10 +843,9 @@ module LogProvider =
             | Some loggerProvider -> loggerProvider.GetLogger(name)
             | None -> noopLogger
 
-        { new ILog
-            with
-                member x.Log = logFunc
-                member x.MappedContext = openMappedContextDestucturable}
+        { new ILog with
+            member x.Log = logFunc
+            member x.MappedContext = openMappedContextDestucturable }
 
     /// **Description**
     ///
@@ -711,10 +856,7 @@ module LogProvider =
     ///
     /// **Output Type**
     ///   * `ILog`
-    let getLoggerByType (``type`` : Type) =
-        ``type``
-        |> string
-        |> getLoggerByName
+    let getLoggerByType (``type``: Type) = ``type`` |> string |> getLoggerByName
 
     /// **Description**
     ///
@@ -723,8 +865,7 @@ module LogProvider =
     /// **Output Type**
     ///   * `ILog`
     ///
-    let getLoggerFor<'a> () =
-        getLoggerByType(typeof<'a>)
+    let getLoggerFor<'a> () = getLoggerByType (typeof<'a>)
 
     let rec getModuleType =
         function
@@ -752,9 +893,8 @@ module LogProvider =
     ///
     /// **Exceptions**
     ///
-    let getLoggerByQuotation (quotation : Quotations.Expr) =
-        getModuleType quotation
-        |> getLoggerByType
+    let getLoggerByQuotation (quotation: Quotations.Expr) =
+        getModuleType quotation |> getLoggerByType
 
 
 
@@ -769,6 +909,7 @@ module LogProvider =
     ///
     let inline getLoggerByFunc () =
         let mi = Reflection.MethodBase.GetCurrentMethod()
+
         sprintf "%s.%s" mi.DeclaringType.FullName mi.Name
         |> getLoggerByName
 
@@ -781,6 +922,6 @@ module LogProvider =
     /// **Output Type**
     ///   * `ILog`
     [<Obsolete("getCurrentLogger is obsolete, choose another provider factory function")>]
-    let getCurrentLogger ()   =
+    let getCurrentLogger () =
         let stackFrame = StackFrame(2, false)
-        getLoggerByType(stackFrame.GetMethod().DeclaringType)
+        getLoggerByType (stackFrame.GetMethod().DeclaringType)

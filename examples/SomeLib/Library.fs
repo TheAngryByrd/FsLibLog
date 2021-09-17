@@ -1,6 +1,7 @@
 ﻿namespace SomeLib
 open FsLibLog
 open FsLibLog.Types
+open System
 
 module Say =
     // let logger = LogProvider.getLoggerByName "SomeLibrary.Say"
@@ -65,3 +66,14 @@ module Say =
                 // Adds an exception to the log
                 >> Log.addException  e
             )
+
+    // Example Log Output:
+    // 2021-09-15T20:34:14.9060810-04:00 [Information] <SomeLib.Say> () The user {"Name": "Ensign Kim", "$type": "AdditionalData"} has requested a reservation date of "2021-09-16T00:34:14.8853360+00:00"
+    let interpolated (person : AdditionalData) (reservationDate : DateTimeOffset) =
+        // Starts the log out as an Info log
+        logger.info(
+            // Generates a message template via a specific string intepolation syntax.
+            // Add the name of the property after the expression
+            // for example: "person" will be logged as "user" and "reservationDate" as "reservationDate"
+            Log.setMessageI $"The user {person:User} has requested a reservation date of {reservationDate:ReservationDate} "
+        )

@@ -19,5 +19,7 @@ let main argv =
 
     Say.fail "DaiMon"
 
+    Say.interpolated {Name = "Ensign Kim"} DateTimeOffset.UtcNow
+
     Console.ReadLine() |> ignore
     0
