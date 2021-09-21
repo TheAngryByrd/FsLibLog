@@ -172,7 +172,7 @@ module Say =
         logger.info(
             // Generates a message template via a specific string intepolation syntax.
             // Add the name of the property after the expression
-            // for example: "person" will be logged as "user" and "reservationDate" as "reservationDate"
+            // for example: "person" will be logged as "User" and "reservationDate" as "ReservationDate"
             Log.setMessageI $"The user {person:User} has requested a reservation date of {reservationDate:ReservationDate} "
         )
 
