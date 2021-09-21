@@ -2,21 +2,32 @@
 open FsLibLog
 open FsLibLog.Types
 open System
+open FsLibLog.Operators
 
 module Say =
-    // let logger = LogProvider.getLoggerByName "SomeLibrary.Say"
-    let rec logger = LogProvider.getLoggerByQuotation <@ logger @>
+
     type AdditionalData = {
         Name : string
     }
 
+#if !FABLE_COMPILER
+    // let logger = LogProvider.getLoggerByName "SomeLibrary.Say"
+    let rec logger = LogProvider.getLoggerByQuotation <@ logger @>
+
     let rec myModule = LogProvider.getModuleType <@ myModule @>
+#else
+    let logger = LogProvider.getLoggerByName "SomeLib.Say"
+#endif
     // Example Log Output:
     // 16:23 [Information] <SomeLib.Say> () "Captain" Was said hello to - {"UserContext": {"Name": "User123", "$type": "AdditionalData"}, "FunctionName": "hello"}
     let hello name  =
-        let logger2 = LogProvider.getLoggerByFunc ()
+#if !FABLE_COMPILER
+        // if you're not using fable, you can create a more specific logger for a given function
+        // Fable would have to request by a more specific name, and can't create via function
+        let logger = LogProvider.getLoggerByFunc ()
+#endif
         // Starts the log out as an Informational log
-        logger2.info(
+        logger.info(
             Log.setMessage "{name} Was said hello to"
             // MessageTemplates require the order of parameters to be consistent with the tokens to replace
             >> Log.addParameter name
@@ -77,3 +88,10 @@ module Say =
             // for example: "person" will be logged as "user" and "reservationDate" as "reservationDate"
             Log.setMessageI $"The user {person:User} has requested a reservation date of {reservationDate:ReservationDate} "
         )
+
+    // Creates a log similar to the other logs, but using operators
+    let useOperators name =
+        !!! "{name} said hello!"
+        >>!- ("name", name)
+        |> logger.info
+        sprintf "%s says \"Hello\"" name

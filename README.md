@@ -188,7 +188,7 @@ module Say =
     // Has the same logging output as `hello`, above, but uses the Operators module.
     let helloWithOperators name =
         // Initiate a log with a message
-        !! "{name} Was said hello to"
+        !!! "{name} Was said hello to"
         // Add a parameter
         >>! name
         // Adds a value, but does not destructure it.

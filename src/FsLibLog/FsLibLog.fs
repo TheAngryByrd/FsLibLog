@@ -464,7 +464,7 @@ module Operators =
     /// </summary>
     /// <param name="message">The string of the base message.</param>
     /// <returns>A new Log instance with the specified message.</returns>
-    let (!!) message = Log.setMessage message
+    let (!!!) message = Log.setMessage message
 
     /// <summary>
     /// Amends a log with a parameter. Wrapper for <see cref="M:FsLibLog.Types.LogModule.addParameter">Log.addParameter</see>.
