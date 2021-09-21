@@ -380,6 +380,7 @@ module Types =
         let private formatterRegex =
             Regex(@"(?<!{){(?<number>\d+)(?<columnFormat>:(?<format>[^}]+))?}(?!})", RegexOptions.Compiled)
 
+#if !FABLE_COMPILER
         let private isAnObject value =
             Convert.GetTypeCode(value) = TypeCode.Object
 
@@ -405,7 +406,6 @@ module Types =
                         let propertyName = formatGroup.Value
                         let columnFormatGroup = m.Groups.["columnFormat"]
                         propertyName, propertyValue, columnFormatGroup.Index, columnFormatGroup.Length
-
                         )
             // Reverse the args so we won't change the indexes earlier in the string
             args
@@ -455,6 +455,7 @@ module Types =
         /// <param name="log">The log to amend.</param>
         /// <returns>The amended log.</returns>
         let setMessageI (message: FormattableString) (log: Log) = setMessageInterpolated message log
+#endif
 
 /// Provides operators to make writing logs more streamlined.
 module Operators =
@@ -510,6 +511,7 @@ module Operators =
     let (>>!!) log e = log >> Log.addException e
 
 
+#if !FABLE_COMPILER
 module Providers =
     module SerilogProvider =
         open System
@@ -851,9 +853,6 @@ module Providers =
                     |> FuncConvert.FromFunc
 
                 let write, writeError =
-
-
-
                     let messageParam = Expression.Parameter(typedefof<MessageFormat>)
                     let propertyValuesParam = Expression.Parameter(typedefof<MessageArgs>)
 
@@ -1011,10 +1010,13 @@ module Providers =
                         loggerGateway.Value.BeginScope logger (box message)
 
         let create () = MicrosoftProvider() :> ILogProvider
+
 module LogProvider =
     open System
     open Types
+    #if !FABLE_COMPILER
     open Providers
+    #endif
     open System.Diagnostics
     open Microsoft.FSharp.Quotations.Patterns
 
@@ -1022,8 +1024,10 @@ module LogProvider =
 
     let private knownProviders =
         [
+        #if !FABLE_COMPILER
             (SerilogProvider.isAvailable, SerilogProvider.create)
             (MicrosoftExtensionsLoggingProvider.isAvailable, MicrosoftExtensionsLoggingProvider.create)
+        #endif
         ]
 
     /// Greedy search for first available LogProvider. Order of known providers matters.
@@ -1142,8 +1146,12 @@ module LogProvider =
     /// **Output Type**
     ///   * `ILog`
     ///
-    let getLoggerFor<'a> () = getLoggerByType (typeof<'a>)
+    let inline getLoggerFor<'a> () = getLoggerByType (typeof<'a>)
 
+
+// Can't access StackFrame in Fable
+// `GetCurrentMethod()` returns null in Fable
+#if !FABLE_COMPILER
     let rec getModuleType =
         function
         | PropertyGet (_, propertyInfo, _) -> propertyInfo.DeclaringType
@@ -1173,10 +1181,6 @@ module LogProvider =
     let getLoggerByQuotation (quotation: Quotations.Expr) =
         getModuleType quotation |> getLoggerByType
 
-
-// Can't access StackFrame in Fable
-// `GetCurrentMethod()` returns null in Fable
-#if !FABLE_COMPILER
     /// **Description**
     ///
     /// Creates a logger based on `Reflection.MethodBase.GetCurrentMethod` call.  This is only useful for calls within functions.  This does not protect against inlined functions.
@@ -1186,7 +1190,7 @@ module LogProvider =
     ///
     /// **Exceptions**
     ///
-    let getLoggerByFunc () =
+    let inline getLoggerByFunc () =
         let mi = Reflection.MethodBase.GetCurrentMethod()
 
         sprintf "%s.%s" mi.DeclaringType.FullName mi.Name
