@@ -221,6 +221,9 @@ let (|Fsproj|Csproj|Vbproj|) (projFileName:string) =
     | f when f.EndsWith("vbproj") -> Vbproj
     | _                           -> failwith (sprintf "Project file %s not supported. Unknown project type." projFileName)
 
+Target.create "RunNpmInstall" <| fun _ ->
+    Npm.exec "install" (fun o -> { o with WorkingDirectory = "./tests/FsLibLog.Tests" } )
+
 Target.create "RunNpmTests" <| fun _ ->
     Npm.exec "test" (fun o -> { o with WorkingDirectory = "./tests/FsLibLog.Tests" } )
 
@@ -337,6 +340,8 @@ Target.create "Release" ignore
 "DotnetRestore" ?=> "AssemblyInfo"
 "AssemblyInfo" ?=> "DotnetBuild"
 "AssemblyInfo" ==> "Publish"
+
+"RunNpmInstall" ==> "RunNpmTests"
 
 "DotnetRestore"
   ==> "DotnetBuild"
