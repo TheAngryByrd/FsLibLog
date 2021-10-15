@@ -377,10 +377,11 @@ module Types =
         /// <returns>The amended log.</returns>
         let setLogLevel (logLevel: LogLevel) (log: Log) = { log with LogLevel = logLevel }
 
+#if !FABLE_COMPILER
+
         let private formatterRegex =
             Regex(@"(?<!{){(?<number>\d+)(?<columnFormat>:(?<format>[^}]+))?}(?!})", RegexOptions.Compiled)
 
-#if !FABLE_COMPILER
         let private isAnObject value =
             Convert.GetTypeCode(value) = TypeCode.Object
 

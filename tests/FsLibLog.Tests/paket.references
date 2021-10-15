@@ -3,3 +3,5 @@ FSharp.Core
 Microsoft.NET.Test.Sdk
 YoloDev.Expecto.TestSdk
 altcover
+Fable.Mocha
+Fable.Core

@@ -1,0 +1,21 @@
+{
+    "type":"module",
+    "scripts": {
+        "pretest": "dotnet fable FsLibLog.Tests.fsproj -o dist/tests --commonjs",
+        "test": "mocha dist/tests",
+        "start": "webpack serve --open",
+        "build-for-browser": "webpack"
+    },
+    "devDependencies": {
+        "mocha": "^9.1.1"
+    },
+    "dependencies": {
+        "@babel/core": "^7.15.5",
+        "esm": "^3.2.25",
+        "fable-compiler": "^2.13.0",
+        "fable-loader": "^2.1.9",
+        "webpack": "^5.53.0",
+        "webpack-cli": "^4.8.0",
+        "webpack-dev-server": "^4.2.1"
+    }
+}
