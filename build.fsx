@@ -14,6 +14,7 @@ open Fake.IO.Globbing.Operators
 open Fake.Core.TargetOperators
 open Fake.Api
 open Fake.BuildServer
+open Fake.JavaScript
 
 BuildServer.install [
     GitHubActions.Installer
@@ -220,6 +221,8 @@ let (|Fsproj|Csproj|Vbproj|) (projFileName:string) =
     | f when f.EndsWith("vbproj") -> Vbproj
     | _                           -> failwith (sprintf "Project file %s not supported. Unknown project type." projFileName)
 
+Target.create "RunNpmTests" <| fun _ ->
+    Npm.exec "test" (fun o -> { o with WorkingDirectory = "./tests/FsLibLog.Tests" } )
 
 Target.create "AssemblyInfo" <| fun _ ->
     let releaseChannel =
@@ -339,6 +342,7 @@ Target.create "Release" ignore
   ==> "DotnetBuild"
   ==> "DotnetTest"
   ==> "GenerateCoverageReport"
+  ==> "RunNpmTests"
   ==> "DotnetPack"
   ==> "GitRelease"
   ==> "GitHubRelease"

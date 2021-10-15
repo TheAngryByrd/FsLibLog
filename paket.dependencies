@@ -34,3 +34,4 @@ group Build
     nuget Argu
     nuget Octokit 0.48
     nuget MSBuild.StructuredLogger 2.1.545
+    nuget Fake.JavaScript.Npm
