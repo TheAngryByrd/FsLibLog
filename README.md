@@ -47,6 +47,8 @@ Target.create "Replace" <| fun _ ->
     (!! "paket-files/TheAngryByrd/FsLibLog/src/FsLibLog/FsLibLog.fs")
 ```
 
+### 3. [Setup a LogProvider](#log-providers)
+
 ## Using in your library
 
 ### Open namespaces
@@ -199,14 +201,58 @@ Providers are the actual logging framework that sends the logs to some destinati
 ### Currently supported provider
 
 - [Serilog](https://github.com/serilog/serilog)
+- [Microsoft.Extensions.Logging](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-5.0)
 
-### Custom Providers
+#### Setting up Serilog
+
+1. Install [Serilog](https://www.nuget.org/packages/Serilog)
+2. Install [Serilog.Sinks.ColoredConsole](https://www.nuget.org/packages/Serilog.Sinks.Console/) (or any other [Sink](https://github.com/serilog/serilog/wiki/Provided-Sinks))
+3. Create your `Logger`
+
+    ```fsharp
+        let log =
+            LoggerConfiguration()
+                .MinimumLevel.Verbose()
+                .WriteTo.Console(outputTemplate= "{Timestamp:o} [{Level}] <{SourceContext}> ({Name:l}) {Message:j} - {Properties:j}{NewLine}{Exception}")
+                .Enrich.FromLogContext()
+                .CreateLogger();
+        Log.Logger <- log
+    ```
+
+4. FsLibLog will pick up Serilog automatically, no need to tell FsLibLog about it
+
+### Setting up Microsoft.Extensions.Logging
+
+1. Install [Microsoft.Extensions.Logging](https://www.nuget.org/packages/Microsoft.Extensions.Logging/)
+2. Install [Microsoft.Extensions.Logging.Console](https://www.nuget.org/packages/Microsoft.Extensions.Logging.Console) (or any other [Provider](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-5.0#logging-providers-1))
+3. Create your `ILoggerFactory`
+
+    ```fsharp
+    let microsoftLoggerFactory = LoggerFactory.Create(fun builder ->
+            builder
+                .SetMinimumLevel(LogLevel.Debug)
+                .AddSimpleConsole(fun opts -> opts.IncludeScopes <-true)
+                // .AddJsonConsole(fun opts -> opts.IncludeScopes <- true)
+            |> ignore
+
+        )
+    ```
+
+4. Tell FsLibLog to use this factory
+
+    ```fsharp
+    FsLibLog.Providers.MicrosoftExtensionsLoggingProvider.setMicrosoftLoggerFactory microsoftLoggerFactory
+    ```
+
+    1. One downside to this is you need to do this for every library your application consumes that uses FsLiblog.
+
+#### Custom Providers
 
 You can implement and teach FsLibLog about your own custom provider if one is not listed. You have to do 2 things:
 
 1. You have to implement the `ILogProvider` interface. [Example Implemenation](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/ConsoleExample/Program.fs#L5-L90)
 2. You have to tell FsLibLog to use it. [Example calling FsLibLog.LogProvider.setLoggerProvider](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/ConsoleExample/Program.fs#L94)
-  a. One downside to this is you need to do this for every library your application consumes that uses FsLiblog.
+    1. One downside to this is you need to do this for every library your application consumes that uses FsLiblog.
 
 ---
 
