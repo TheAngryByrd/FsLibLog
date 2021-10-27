@@ -26,6 +26,5 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="FsLibLog.fs" />
   </ItemGroup>
-  <Import Project="..\..\netfx.props" />
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
