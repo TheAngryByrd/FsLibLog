@@ -702,7 +702,7 @@ module Providers =
                   IsEnabled = fun logger level -> isEnabled.Invoke(logger, level)
                   TranslateLevel = translateLevel }
 
-        type private SerigLogProvider() =
+        type private SeriLogProvider() =
             let getLoggerByName = getForContextMethodCall ()
             let pushProperty = getPushProperty ()
             let serilogGatewayInit = lazy (SerilogGateway.Create())
@@ -733,10 +733,253 @@ module Providers =
 
                 member this.OpenNestedContext(message: string) : IDisposable = pushProperty "NDC" message false
 
-        let create () = SerigLogProvider() :> ILogProvider
+        let create () = SeriLogProvider() :> ILogProvider
+
+
+    module MicrosoftExtensionsLoggingProvider =
+        open System
+        open System.Linq.Expressions
+        open System.Reflection
+        open System.Collections.Generic
+
+        type ILoggerFactory = obj
+        // This has to be set from usercode for this to light up
+        let mutable private  microsoftLoggerFactory : ILoggerFactory option = None
+        let setMicrosoftLoggerFactory (factory : ILoggerFactory) = microsoftLoggerFactory <- Option.ofObj factory
+
+        let getLogFactoryType = lazy(Type.GetType("Microsoft.Extensions.Logging.ILoggerFactory, Microsoft.Extensions.Logging.Abstractions"))
+        let isAvailable () =
+            getLogFactoryType.Value |> isNull |> not
+            && microsoftLoggerFactory |> Option.isSome
+
+
+        type ILogger = obj
+        type LoggerName = string
+        type MicrosoftLogLevel = obj
+        type MessageFormat = string
+        type MessageArgs = obj array
+
+        [<NoEquality; NoComparison>]
+        type LoggerFactoryGateway = {
+            CreateLogger : ILoggerFactory -> LoggerName -> ILogger
+        }
+        with
+            static member Create() =
+                let createLogger =
+                    let factoryType = getLogFactoryType.Value
+                    let createLoggerMethodInfo =
+                        factoryType.GetMethod(
+                            "CreateLogger",
+                            [|typedefof<string>|])
+                    let instanceParam = Expression.Parameter(typedefof<ILoggerFactory>)
+                    let nameParam = Expression.Parameter(typedefof<string>)
+                    let instanceCast =
+                        Expression.Convert(instanceParam, factoryType)
+                    let createLoggerMethodExp =
+                        Expression.Call(instanceCast, createLoggerMethodInfo, nameParam)
+                    let createLogger =
+                        Expression
+                            .Lambda<Func<ILoggerFactory,string,ILogger>>(createLoggerMethodExp, instanceParam, nameParam)
+                            .Compile()
+                    createLogger
+                    |> FuncConvert.FromFunc
+                {
+                    CreateLogger = createLogger
+                }
+
+        type LoggerGateway = {
+            Write: ILogger -> MicrosoftLogLevel -> MessageFormat -> MessageArgs -> unit
+            WriteError: ILogger -> MicrosoftLogLevel -> exn -> MessageFormat -> MessageArgs -> unit
+            IsEnabled: ILogger -> MicrosoftLogLevel -> bool
+            TranslateLevel : LogLevel -> MicrosoftLogLevel
+            BeginScope : ILogger -> obj -> IDisposable
+        } with
+            static member Create () =
+                let loggerExtensions = Type.GetType("Microsoft.Extensions.Logging.LoggerExtensions, Microsoft.Extensions.Logging.Abstractions")
+                let loggerType = Type.GetType("Microsoft.Extensions.Logging.ILogger, Microsoft.Extensions.Logging.Abstractions")
+                let logEventLevelType =
+                    Type.GetType("Microsoft.Extensions.Logging.LogLevel, Microsoft.Extensions.Logging.Abstractions")
+                let instanceParam = Expression.Parameter(typedefof<ILogger>)
+
+                let instanceCast =
+                    Expression.Convert(instanceParam, loggerType)
+                let levelParam = Expression.Parameter(typedefof<MicrosoftLogLevel>)
+
+                let levelCast = Expression.Convert(levelParam, logEventLevelType)
+
+                let isEnabled =
+                    let isEnabledMethodInfo =
+                        loggerType.GetMethod("IsEnabled", [| logEventLevelType |])
+                    let isEnabledMethodCall =
+                        Expression.Call(instanceCast, isEnabledMethodInfo, levelCast)
+
+
+                    Expression
+                        .Lambda<Func<ILogger, MicrosoftLogLevel, bool>>(isEnabledMethodCall, instanceParam, levelParam)
+                        .Compile()
+                    |> FuncConvert.FromFunc
+
+                let write, writeError =
 
 
 
+                    let messageParam = Expression.Parameter(typedefof<MessageFormat>)
+                    let propertyValuesParam = Expression.Parameter(typedefof<MessageArgs>)
+
+                    let write =
+                        let writeMethodInfo =
+                            loggerExtensions.GetMethod(
+                                "Log",
+                                BindingFlags.Static ||| BindingFlags.Public,
+                                null,
+                                [| loggerType
+                                   logEventLevelType
+                                   typedefof<MessageFormat>
+                                   typedefof<MessageArgs> |],
+                                null
+                            )
+
+                        let writeMethodExp = Expression.Call(null, writeMethodInfo, instanceCast, levelCast, messageParam, propertyValuesParam)
+
+                        let expression =
+                            Expression.Lambda<Action<ILogger, MicrosoftLogLevel, MessageFormat, MessageArgs>>(
+                                writeMethodExp,
+                                instanceParam,
+                                levelParam,
+                                messageParam,
+                                propertyValuesParam
+                            )
+                        expression.Compile() |> FuncConvert.FromAction
+
+
+                    let writeError =
+                        let writeMethodInfo =
+                            loggerExtensions.GetMethod(
+                                "Log",
+                                BindingFlags.Static ||| BindingFlags.Public,
+                                null,
+                                [| loggerType
+                                   logEventLevelType
+                                   typedefof<exn>
+                                   typedefof<MessageFormat>
+                                   typedefof<MessageArgs> |],
+                                null
+
+                            )
+                        let exnParam = Expression.Parameter(typedefof<exn>)
+                        let writeMethodExp = Expression.Call(null, writeMethodInfo, instanceCast, levelCast, exnParam, messageParam, propertyValuesParam)
+
+                        let expression =
+                            Expression.Lambda<Action<ILogger, MicrosoftLogLevel, exn, MessageFormat, MessageArgs>>(
+                                writeMethodExp,
+                                instanceParam,
+                                levelParam,
+                                exnParam,
+                                messageParam,
+                                propertyValuesParam
+                            )
+                        expression.Compile() |> FuncConvert.FromAction
+                    write, writeError
+
+                let translateLevel =
+
+                    let debugLevel =
+                        Enum.Parse(logEventLevelType, "Debug", false)
+
+                    let errorLevel =
+                        Enum.Parse(logEventLevelType, "Error", false)
+
+                    let criticalLevel =
+                        Enum.Parse(logEventLevelType, "Critical", false)
+
+                    let informationLevel =
+                        Enum.Parse(logEventLevelType, "Information", false)
+
+                    let traceLevel =
+                        Enum.Parse(logEventLevelType, "Trace", false)
+
+                    let warningLevel =
+                        Enum.Parse(logEventLevelType, "Warning", false)
+
+                    fun (level: LogLevel) ->
+                        match level with
+                        | LogLevel.Fatal -> criticalLevel
+                        | LogLevel.Error -> errorLevel
+                        | LogLevel.Warn -> warningLevel
+                        | LogLevel.Info -> informationLevel
+                        | LogLevel.Debug -> debugLevel
+                        | LogLevel.Trace -> traceLevel
+                        | _ -> debugLevel
+                let beginScope =
+                    let beginScopeMethodInfo =
+                        loggerType.GetMethod("BeginScope").MakeGenericMethod(typedefof<obj>)
+                    let stateParam = Expression.Parameter(typedefof<obj>)
+                    let beginScopeMethodCall =
+                        Expression.Call(instanceCast, beginScopeMethodInfo, stateParam)
+
+                    Expression
+                        .Lambda<Func<ILogger, obj, IDisposable>>(beginScopeMethodCall, instanceParam, stateParam)
+                        .Compile()
+                    |> FuncConvert.FromFunc
+
+                {
+                    Write = write
+                    WriteError = writeError
+                    IsEnabled = isEnabled
+                    TranslateLevel = translateLevel
+                    BeginScope = beginScope
+                }
+
+
+        type private MicrosoftProvider() =
+            let factoryGateway = lazy(LoggerFactoryGateway.Create())
+            let loggerGateway = lazy(LoggerGateway.Create())
+            interface ILogProvider with
+                member this.GetLogger(name: string) : Logger =
+                    match microsoftLoggerFactory with
+                    | None ->
+                        fun _ _ _ _ -> false
+                    | Some factory ->
+                        let logger = factoryGateway.Value.CreateLogger factory name
+
+                        fun logLevel message exn args ->
+                            let microsoftLevel = loggerGateway.Value.TranslateLevel logLevel
+                            match message with
+                            | Some message ->
+                                let message = message ()
+                                match exn with
+                                | Some ex ->
+                                    loggerGateway.Value.WriteError logger microsoftLevel ex message args
+                                | None ->
+                                    loggerGateway.Value.Write logger microsoftLevel message args
+                                true
+                            | None ->
+                                loggerGateway.Value.IsEnabled logger microsoftLevel
+
+                member this.OpenMappedContext (key: string) (value: obj) (destructure: bool) : IDisposable =
+                    match microsoftLoggerFactory with
+                    | None ->
+                        { new IDisposable with member x.Dispose () = ()}
+                    | Some factory ->
+                        // Create bogus logger that will propagate to a real logger later
+                        let logger = factoryGateway.Value.CreateLogger factory (Guid.NewGuid().ToString())
+                        // Requires a IEnumerable<KeyValuePair> to make sense
+                        // https://nblumhardt.com/2016/11/ilogger-beginscope/
+                        [KeyValuePair(key, value)]
+                        |> box
+                        |> loggerGateway.Value.BeginScope logger
+
+
+                member this.OpenNestedContext(message: string) : IDisposable =
+                    match microsoftLoggerFactory with
+                    | None ->
+                        { new IDisposable with member x.Dispose () = ()}
+                    | Some factory ->
+                        // Create bogus logger that will propagate to a real logger later
+                        let logger = factoryGateway.Value.CreateLogger factory (Guid.NewGuid().ToString())
+                        loggerGateway.Value.BeginScope logger (box message)
+
+        let create () = MicrosoftProvider() :> ILogProvider
 module LogProvider =
     open System
     open Types
@@ -747,7 +990,10 @@ module LogProvider =
     let mutable private currentLogProvider = None
 
     let private knownProviders =
-        [ (SerilogProvider.isAvailable, SerilogProvider.create) ]
+        [
+            (SerilogProvider.isAvailable, SerilogProvider.create)
+            (MicrosoftExtensionsLoggingProvider.isAvailable, MicrosoftExtensionsLoggingProvider.create)
+        ]
 
     /// Greedy search for first available LogProvider. Order of known providers matters.
     let private resolvedLogger =
