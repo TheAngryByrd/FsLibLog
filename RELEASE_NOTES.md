@@ -1,3 +1,6 @@
+#### 0.7.0 - 2021-10-27
+* FEATURE: [Adds Microsoft.Extensions.Logging as a provider](https://github.com/TheAngryByrd/FsLibLog/pull/25)
+
 #### 0.6.0 - 2021-09-17
 * FEATURE: [Adds Logging operators](https://github.com/TheAngryByrd/FsLibLog/pull/19)
 * FEATURE: [Adds interpolated strings](https://github.com/TheAngryByrd/FsLibLog/pull/23)
