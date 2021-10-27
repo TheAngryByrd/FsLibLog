@@ -10,9 +10,9 @@ nuget altcover 6.6.747
 
 nuget NpgSql
 nuget Marten
+nuget Microsoft.Extensions.Logging
 
 // [ FAKE GROUP ]
-group Build
 group Build
     storage: none
     source https://www.nuget.org/api/v2
