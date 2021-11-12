@@ -442,10 +442,10 @@ var assemblies = [
   {
     "name": "FsLibLog",
     "classes": [
-      { "name": "FsLibLog.LogProvider", "rp": "FsLibLog_LogProvider.htm", "cl": 14, "ucl": 59, "cal": 73, "tl": 1173, "ct": "LineCoverage", "mc": "-", "cb": 4, "tb": 16, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.Operators", "rp": "FsLibLog_Operators.htm", "cl": 4, "ucl": 6, "cal": 10, "tl": 1173, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.Providers", "rp": "FsLibLog_Providers.htm", "cl": 0, "ucl": 391, "cal": 391, "tl": 1173, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 25, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.Types", "rp": "FsLibLog_Types.htm", "cl": 92, "ucl": 49, "cal": 141, "tl": 1173, "ct": "LineCoverage", "mc": "-", "cb": 7, "tb": 10, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.LogProvider", "rp": "FsLibLog_LogProvider.htm", "cl": 14, "ucl": 89, "cal": 103, "tl": 1214, "ct": "LineCoverage", "mc": "-", "cb": 4, "tb": 24, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Operators", "rp": "FsLibLog_Operators.htm", "cl": 4, "ucl": 10, "cal": 14, "tl": 1214, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Providers", "rp": "FsLibLog_Providers.htm", "cl": 0, "ucl": 498, "cal": 498, "tl": 1214, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 39, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Types", "rp": "FsLibLog_Types.htm", "cl": 92, "ucl": 110, "cal": 202, "tl": 1214, "ct": "LineCoverage", "mc": "-", "cb": 7, "tb": 18, "lch": [], "bch": [], "hc": [] },
       { "name": "System.AssemblyVersionInformation", "rp": "FsLibLog_AssemblyVersionInformation.htm", "cl": 0, "ucl": 0, "cal": 0, "tl": 0, "ct": "MethodCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
@@ -667,7 +667,7 @@ var riskHotspots = [
     "metrics": [
       { "value": 66, "exceeded": true },
       { "value": 38043648, "exceeded": true },
-      { "value": 4068.72, "exceeded": true },
+      { "value": 0, "exceeded": false },
     ]},
   {
     "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Core.LanguagePrimitives", "reportPath": "FSharp.Core_LanguagePrimitives.htm", "methodName": "TResult Microsoft.FSharp.Core.LanguagePrimitives::LogicalNotDynamic(T)", "methodShortName": "LogicalNotDynamic(...)", "fileIndex": 0, "line": 2777,
@@ -716,7 +716,7 @@ var riskHotspots = [
     "metrics": [
       { "value": 32, "exceeded": true },
       { "value": 10240, "exceeded": true },
-      { "value": 806.46, "exceeded": true },
+      { "value": 0, "exceeded": false },
     ]},
   {
     "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Core.PrintfImpl", "reportPath": "FSharp.Core_PrintfImpl.htm", "methodName": "System.Int32 Microsoft.FSharp.Core.PrintfImpl/Step::BlockCount(Microsoft.FSharp.Core.PrintfImpl/Step[])", "methodShortName": "BlockCount(...)", "fileIndex": 0, "line": 271,
@@ -775,13 +775,6 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Quotations.PatternsModule", "reportPath": "FSharp.Core_PatternsModule.htm", "methodName": "Microsoft.FSharp.Quotations.PatternsModule/ModuleDefinitionBindingResult`2<Microsoft.FSharp.Core.FSharpFunc`2<Microsoft.FSharp.Collections.FSharpList`1<System.Type>,Microsoft.FSharp.Quotations.ExprConstInfo>,Microsoft.FSharp.Core.FSharpFunc`2<Microsoft.FSharp.Collections.FSharpList`1<System.Type>,Microsoft.FSharp.Core.FSharpFunc`2<Microsoft.FSharp.Collections.FSharpList`1<System.Type>,Microsoft.FSharp.Quotations.ExprConstInfo>>> Microsoft.FSharp.Quotations.PatternsModule::u_constSpec(Microsoft.FSharp.Quotations.PatternsModule/SimpleUnpickle/InputState)", "methodShortName": "u_constSpec(...)", "fileIndex": 0, "line": 1632,
-    "metrics": [
-      { "value": 53, "exceeded": true },
-      { "value": 832, "exceeded": true },
-      { "value": 1768.96, "exceeded": true },
-    ]},
-  {
     "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Reflection.Impl", "reportPath": "FSharp.Core_Impl.htm", "methodName": "System.Type Microsoft.FSharp.Reflection.Impl::mkTupleType(System.Boolean,System.Reflection.Assembly,System.Type[])", "methodShortName": "mkTupleType(...)", "fileIndex": 0, "line": 507,
     "metrics": [
       { "value": 21, "exceeded": false },
@@ -807,6 +800,13 @@ var riskHotspots = [
     "metrics": [
       { "value": 13, "exceeded": false },
       { "value": 1024, "exceeded": true },
+      { "value": 0, "exceeded": false },
+    ]},
+  {
+    "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Quotations.PatternsModule", "reportPath": "FSharp.Core_PatternsModule.htm", "methodName": "Microsoft.FSharp.Quotations.PatternsModule/ModuleDefinitionBindingResult`2<Microsoft.FSharp.Core.FSharpFunc`2<Microsoft.FSharp.Collections.FSharpList`1<System.Type>,Microsoft.FSharp.Quotations.ExprConstInfo>,Microsoft.FSharp.Core.FSharpFunc`2<Microsoft.FSharp.Collections.FSharpList`1<System.Type>,Microsoft.FSharp.Core.FSharpFunc`2<Microsoft.FSharp.Collections.FSharpList`1<System.Type>,Microsoft.FSharp.Quotations.ExprConstInfo>>> Microsoft.FSharp.Quotations.PatternsModule::u_constSpec(Microsoft.FSharp.Quotations.PatternsModule/SimpleUnpickle/InputState)", "methodShortName": "u_constSpec(...)", "fileIndex": 0, "line": 1632,
+    "metrics": [
+      { "value": 53, "exceeded": true },
+      { "value": 832, "exceeded": true },
       { "value": 0, "exceeded": false },
     ]},
   {
@@ -856,7 +856,7 @@ var riskHotspots = [
     "metrics": [
       { "value": 9, "exceeded": false },
       { "value": 256, "exceeded": true },
-      { "value": 10.54, "exceeded": false },
+      { "value": 0, "exceeded": false },
     ]},
   {
     "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Collections.SetTreeModule", "reportPath": "FSharp.Core_SetTreeModule.htm", "methodName": "Microsoft.FSharp.Collections.SetTree`1<a> Microsoft.FSharp.Collections.SetTreeModule::rebalance(Microsoft.FSharp.Collections.SetTree`1<a>,a,Microsoft.FSharp.Collections.SetTree`1<a>)", "methodShortName": "rebalance(...)", "fileIndex": 0, "line": 105,
@@ -901,41 +901,6 @@ var riskHotspots = [
       { "value": 0, "exceeded": false },
     ]},
   {
-    "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Core.PrintfImpl", "reportPath": "FSharp.Core_PrintfImpl.htm", "methodName": "TResult Microsoft.FSharp.Core.PrintfImpl/PrintfEnv`3::RunSteps(System.Object[],System.Type[],Microsoft.FSharp.Core.PrintfImpl/Step[])", "methodShortName": "RunSteps(...)", "fileIndex": 0, "line": 320,
-    "metrics": [
-      { "value": 10, "exceeded": false },
-      { "value": 18, "exceeded": false },
-      { "value": 59.21, "exceeded": true },
-    ]},
-  {
-    "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Collections.MapTreeModule", "reportPath": "FSharp.Core_MapTreeModule.htm", "methodName": "d Microsoft.FSharp.Collections.MapTreeModule::foldFromTo@358(System.Collections.Generic.IComparer`1<TKey>,TKey,TKey,Microsoft.FSharp.Core.OptimizedClosures/FSharpFunc`4<TKey,c,d,d>,Microsoft.FSharp.Collections.MapTree`2<TKey,c>,d)", "methodShortName": "foldFromTo@358(...)", "fileIndex": 0, "line": 360,
-    "metrics": [
-      { "value": 9, "exceeded": false },
-      { "value": 64, "exceeded": false },
-      { "value": 45.86, "exceeded": true },
-    ]},
-  {
-    "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Quotations.PatternsModule", "reportPath": "FSharp.Core_PatternsModule.htm", "methodName": "Microsoft.FSharp.Quotations.FSharpExpr Microsoft.FSharp.Quotations.PatternsModule::fillHolesInRawExpr(Microsoft.FSharp.Quotations.FSharpExpr[],Microsoft.FSharp.Quotations.FSharpExpr)", "methodShortName": "fillHolesInRawExpr(...)", "fileIndex": 0, "line": 1726,
-    "metrics": [
-      { "value": 7, "exceeded": false },
-      { "value": 8, "exceeded": false },
-      { "value": 42.72, "exceeded": true },
-    ]},
-  {
-    "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Text.StructuredPrintfImpl.ReflectUtils", "reportPath": "FSharp.Core_ReflectUtils.htm", "methodName": "Microsoft.FSharp.Text.StructuredPrintfImpl.ReflectUtils/ValueInfo Microsoft.FSharp.Text.StructuredPrintfImpl.ReflectUtils/Value::GetValueInfo(System.Reflection.BindingFlags,a,System.Type)", "methodShortName": "GetValueInfo(...)", "fileIndex": 0, "line": 456,
-    "metrics": [
-      { "value": 7, "exceeded": false },
-      { "value": 48, "exceeded": false },
-      { "value": 33.84, "exceeded": true },
-    ]},
-  {
-    "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Quotations.PatternsModule", "reportPath": "FSharp.Core_PatternsModule.htm", "methodName": "Microsoft.FSharp.Core.FSharpFunc`2<Microsoft.FSharp.Quotations.PatternsModule/BindingEnv,Microsoft.FSharp.Quotations.FSharpExpr> Microsoft.FSharp.Quotations.PatternsModule::u_Expr(Microsoft.FSharp.Quotations.PatternsModule/SimpleUnpickle/InputState)", "methodShortName": "u_Expr(...)", "fileIndex": 0, "line": 1486,
-    "metrics": [
-      { "value": 9, "exceeded": false },
-      { "value": 9, "exceeded": false },
-      { "value": 31.47, "exceeded": true },
-    ]},
-  {
     "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Core.PrintfImpl", "reportPath": "FSharp.Core_PrintfImpl.htm", "methodName": "Microsoft.FSharp.Core.PrintfImpl/ValueConverter Microsoft.FSharp.Core.PrintfImpl::getValueConverter(System.Type,Microsoft.FSharp.Core.PrintfImpl/FormatSpecifier)", "methodShortName": "getValueConverter(...)", "fileIndex": 0, "line": 976,
     "metrics": [
       { "value": 10, "exceeded": false },
@@ -957,32 +922,11 @@ var riskHotspots = [
       { "value": 21.82, "exceeded": true },
     ]},
   {
-    "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Reflection.Impl", "reportPath": "FSharp.Core_Impl.htm", "methodName": "System.Type[] Microsoft.FSharp.Reflection.Impl::getTupleTypeInfo(System.Type)", "methodShortName": "getTupleTypeInfo(...)", "fileIndex": 0, "line": 536,
-    "metrics": [
-      { "value": 7, "exceeded": false },
-      { "value": 16, "exceeded": false },
-      { "value": 19.63, "exceeded": true },
-    ]},
-  {
-    "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Collections.SeqModule", "reportPath": "FSharp.Core_SeqModule.htm", "methodName": "T[] Microsoft.FSharp.Collections.SeqModule::ToArray(System.Collections.Generic.IEnumerable`1<T>)", "methodShortName": "ToArray(...)", "fileIndex": 1, "line": 815,
-    "metrics": [
-      { "value": 5, "exceeded": false },
-      { "value": 4, "exceeded": false },
-      { "value": 19.47, "exceeded": true },
-    ]},
-  {
     "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Control.AsyncPrimitives", "reportPath": "FSharp.Core_AsyncPrimitives.htm", "methodName": "Microsoft.FSharp.Core.FSharpOption`1<T> Microsoft.FSharp.Control.AsyncPrimitives/ResultCell`1::TryWaitForResultSynchronously(Microsoft.FSharp.Core.FSharpOption`1<System.Int32>)", "methodShortName": "TryWaitForResultSynchronously(...)", "fileIndex": 0, "line": 778,
     "metrics": [
       { "value": 5, "exceeded": false },
       { "value": 8, "exceeded": false },
       { "value": 16.76, "exceeded": true },
-    ]},
-  {
-    "assembly": "FSharp.Core", "class": "Microsoft.FSharp.Reflection.Impl", "reportPath": "FSharp.Core_Impl.htm", "methodName": "System.Boolean Microsoft.FSharp.Reflection.Impl::isUnionType(System.Type,System.Reflection.BindingFlags)", "methodShortName": "isUnionType(...)", "fileIndex": 0, "line": 320,
-    "metrics": [
-      { "value": 6, "exceeded": false },
-      { "value": 0, "exceeded": false },
-      { "value": 16.67, "exceeded": true },
     ]},
 ];
 
