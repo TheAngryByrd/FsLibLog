@@ -11,6 +11,11 @@ NUGET
       Argu (>= 5.2) - restriction: || (>= net461) (>= netstandard2.0)
       Mono.Cecil (>= 0.10.1) - restriction: || (>= net461) (>= netstandard2.0)
       System.Diagnostics.FileVersionInfo (>= 4.3) - restriction: && (< net461) (>= netstandard2.0)
+    Fable.Core (3.4)
+      FSharp.Core (>= 4.7.2) - restriction: >= netstandard2.0
+    Fable.Mocha (2.10)
+      Fable.Core (>= 3.0) - restriction: >= netstandard2.0
+      FSharp.Core (>= 4.7) - restriction: >= netstandard2.0
     FSharp.Core (5.0)
     Marten (3.6)
       Baseline (>= 1.5) - restriction: || (>= net46) (>= netstandard2.0)
@@ -904,7 +909,16 @@ NUGET
     Fake.IO.FileSystem (5.20.4)
       Fake.Core.String (>= 5.20.4) - restriction: >= netstandard2.0
       FSharp.Core (>= 4.7.2) - restriction: >= netstandard2.0
+    Fake.JavaScript.Npm (5.20.4)
+      Fake.Core.Environment (>= 5.20.4) - restriction: >= netstandard2.0
+      Fake.Core.Process (>= 5.20.4) - restriction: >= netstandard2.0
+      Fake.IO.FileSystem (>= 5.20.4) - restriction: >= netstandard2.0
+      Fake.Testing.Common (>= 5.20.4) - restriction: >= netstandard2.0
+      FSharp.Core (>= 4.7.2) - restriction: >= netstandard2.0
     Fake.Net.Http (5.20.4) - restriction: >= netstandard2.0
+      Fake.Core.Trace (>= 5.20.4) - restriction: >= netstandard2.0
+      FSharp.Core (>= 4.7.2) - restriction: >= netstandard2.0
+    Fake.Testing.Common (5.20.4) - restriction: >= netstandard2.0
       Fake.Core.Trace (>= 5.20.4) - restriction: >= netstandard2.0
       FSharp.Core (>= 4.7.2) - restriction: >= netstandard2.0
     Fake.Tools.Git (5.20.4)

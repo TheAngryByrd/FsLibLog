@@ -3,6 +3,8 @@ source https://api.nuget.org/v3/index.json
 storage: none
 nuget FSharp.Core 5.0
 nuget Expecto 8.7
+nuget Fable.Mocha
+nuget Fable.Core
 nuget SourceLink.Create.CommandLine 2.8.1 copy_local: true
 nuget YoloDev.Expecto.TestSdk 0.7.0
 nuget Microsoft.NET.Test.Sdk 15.7.2
@@ -32,3 +34,4 @@ group Build
     nuget Argu
     nuget Octokit 0.48
     nuget MSBuild.StructuredLogger 2.1.545
+    nuget Fake.JavaScript.Npm

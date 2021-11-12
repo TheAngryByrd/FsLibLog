@@ -42,13 +42,44 @@ module Types =
 
     /// An interface wrapper for `Logger`. Useful when using depedency injection frameworks.
     type ILog =
-        abstract member Log : Logger
-        abstract member MappedContext : MappedContext
+        abstract member Log :  Logger
+        abstract member MappedContext :  MappedContext
+
+#if FABLE_COMPILER
+    // Fable doesn't support System.Collections.Generic.Stack, so this implementation (from FCS)
+    // is used instead.
+    type Stack<'a>()  =
+        let mutable contents = Array.zeroCreate<'a>(2)
+        let mutable count = 0
+
+        member buf.Ensure newSize =
+            let oldSize = contents.Length
+            if newSize > oldSize then
+                let old = contents
+                contents <- Array.zeroCreate (max newSize (oldSize * 2))
+                Array.blit old 0 contents 0 count
+
+        member buf.Count = count
+        member buf.Pop() =
+            let item = contents.[count - 1]
+            count <- count - 1
+            item
+
+        member buf.Peep() = contents.[count - 1]
+        member buf.Top(n) = [ for x in contents.[max 0 (count-n)..count - 1] -> x ] |> List.rev
+        member buf.Push(x) =
+            buf.Ensure(count + 1)
+            contents.[count] <- x
+            count <- count + 1
+
+        member buf.IsEmpty = (count = 0)
+#endif
 
     [<AutoOpen>]
     module Inner =
+#if !FABLE_COMPILER
         open System.Collections.Generic
-
+#endif
         type DisposableStack() =
             let stack = Stack<IDisposable>()
 
@@ -346,6 +377,8 @@ module Types =
         /// <returns>The amended log.</returns>
         let setLogLevel (logLevel: LogLevel) (log: Log) = { log with LogLevel = logLevel }
 
+#if !FABLE_COMPILER
+
         let private formatterRegex =
             Regex(@"(?<!{){(?<number>\d+)(?<columnFormat>:(?<format>[^}]+))?}(?!})", RegexOptions.Compiled)
 
@@ -374,7 +407,6 @@ module Types =
                         let propertyName = formatGroup.Value
                         let columnFormatGroup = m.Groups.["columnFormat"]
                         propertyName, propertyValue, columnFormatGroup.Index, columnFormatGroup.Length
-
                         )
             // Reverse the args so we won't change the indexes earlier in the string
             args
@@ -424,6 +456,7 @@ module Types =
         /// <param name="log">The log to amend.</param>
         /// <returns>The amended log.</returns>
         let setMessageI (message: FormattableString) (log: Log) = setMessageInterpolated message log
+#endif
 
 /// Provides operators to make writing logs more streamlined.
 module Operators =
@@ -433,7 +466,7 @@ module Operators =
     /// </summary>
     /// <param name="message">The string of the base message.</param>
     /// <returns>A new Log instance with the specified message.</returns>
-    let (!!) message = Log.setMessage message
+    let (!!!) message = Log.setMessage message
 
     /// <summary>
     /// Amends a log with a parameter. Wrapper for <see cref="M:FsLibLog.Types.LogModule.addParameter">Log.addParameter</see>.
@@ -479,6 +512,7 @@ module Operators =
     let (>>!!) log e = log >> Log.addException e
 
 
+#if !FABLE_COMPILER
 module Providers =
     module SerilogProvider =
         open System
@@ -820,9 +854,6 @@ module Providers =
                     |> FuncConvert.FromFunc
 
                 let write, writeError =
-
-
-
                     let messageParam = Expression.Parameter(typedefof<MessageFormat>)
                     let propertyValuesParam = Expression.Parameter(typedefof<MessageArgs>)
 
@@ -980,10 +1011,15 @@ module Providers =
                         loggerGateway.Value.BeginScope logger (box message)
 
         let create () = MicrosoftProvider() :> ILogProvider
+
+#endif
+
 module LogProvider =
     open System
     open Types
+    #if !FABLE_COMPILER
     open Providers
+    #endif
     open System.Diagnostics
     open Microsoft.FSharp.Quotations.Patterns
 
@@ -991,8 +1027,10 @@ module LogProvider =
 
     let private knownProviders =
         [
+        #if !FABLE_COMPILER
             (SerilogProvider.isAvailable, SerilogProvider.create)
             (MicrosoftExtensionsLoggingProvider.isAvailable, MicrosoftExtensionsLoggingProvider.create)
+        #endif
         ]
 
     /// Greedy search for first available LogProvider. Order of known providers matters.
@@ -1111,8 +1149,12 @@ module LogProvider =
     /// **Output Type**
     ///   * `ILog`
     ///
-    let getLoggerFor<'a> () = getLoggerByType (typeof<'a>)
+    let inline getLoggerFor<'a> () = getLoggerByType (typeof<'a>)
 
+
+// Can't access StackFrame in Fable
+// `GetCurrentMethod()` returns null in Fable
+#if !FABLE_COMPILER
     let rec getModuleType =
         function
         | PropertyGet (_, propertyInfo, _) -> propertyInfo.DeclaringType
@@ -1142,8 +1184,6 @@ module LogProvider =
     let getLoggerByQuotation (quotation: Quotations.Expr) =
         getModuleType quotation |> getLoggerByType
 
-
-
     /// **Description**
     ///
     /// Creates a logger based on `Reflection.MethodBase.GetCurrentMethod` call.  This is only useful for calls within functions.  This does not protect against inlined functions.
@@ -1171,3 +1211,4 @@ module LogProvider =
     let getCurrentLogger () =
         let stackFrame = StackFrame(2, false)
         getLoggerByType (stackFrame.GetMethod().DeclaringType)
+#endif

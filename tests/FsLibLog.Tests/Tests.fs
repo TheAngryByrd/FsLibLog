@@ -1,12 +1,24 @@
 module Tests
 
 
+#if FABLE_COMPILER
+open Fable.Mocha
+#else
 open Expecto
+#endif
 open FsLibLog
 open FsLibLog.Types
 open FsLibLog.Operators
 open System
 
+#if FABLE_COMPILER
+module Expect =
+    let contains sequence element message =
+        match sequence |> Seq.tryFind ((=) element) with
+        | Some _ -> ()
+        | None ->
+            failwithf "%s. Sequence did not contain %A." message element
+#endif
 
 let private noopDisposable = {
     new IDisposable with
@@ -45,18 +57,20 @@ module SomeOtherModule =
     // should only be used in getLoggerByQuotation
     let provider = TestProvider()
     LogProvider.setLoggerProvider provider
-
+#if !FABLE_COMPILER
     let rec loggerQuotation = LogProvider.getLoggerByQuotation <@ loggerQuotation @>
-
+#endif
 
 let private getNewProvider () =
     let provider = TestProvider()
     LogProvider.setLoggerProvider provider
     provider
 
+#if !FABLE_COMPILER
 let someFunction () =
     let logger = LogProvider.getLoggerByFunc()
     ()
+#endif
 
 type Dog = {
     Name : string
@@ -65,15 +79,19 @@ type Dog = {
 
 
 
-[<Tests>]
 let tests =
     testSequenced <|
     testList "FsLibLog" [
         testList "getting logger" [
+#if !FABLE_COMPILER
+            testCase "LogProvider.getLoggerByFunc" <| fun _ ->
+                let provider = getNewProvider()
+                someFunction()
+                Expect.equal provider.LoggerName "Tests.someFunction" ""
 
             testCase "LogProvider.getLoggerByQuotation" <| fun _ ->
                 Expect.equal SomeOtherModule.provider.LoggerName "Tests+SomeOtherModule" ""
-
+#endif
             testCase "LogProvider.getLoggerByName" <| fun _ ->
                 let provider = getNewProvider()
                 let loggerName = "Hello.World"
@@ -89,14 +107,9 @@ let tests =
                 let provider = getNewProvider()
                 let logger = LogProvider.getLoggerFor<string>()
                 Expect.equal provider.LoggerName "System.String" ""
-
-            testCase "LogProvider.getLoggerByFunc" <| fun _ ->
-                let provider = getNewProvider()
-                someFunction()
-                Expect.equal provider.LoggerName "Tests.someFunction" ""
         ]
-        testList "setting verbosity" [
 
+        testList "setting verbosity" [
             testCase "trace" <| fun _ ->
                 let provider = getNewProvider()
                 let logger = LogProvider.getLoggerByName "trace"
@@ -168,11 +181,11 @@ let tests =
                 let actual = provider.MessageThunk.Value()
                 Expect.equal actual "test message" ""
 
-            testCase "setMessage operator (!!)" <| fun _ ->
+            testCase "setMessage operator (!!! )" <| fun _ ->
                 let provider = getNewProvider()
                 let message = "test message"
-                let logger = LogProvider.getLoggerByName "!!"
-                logger.fatal(!! message)
+                let logger = LogProvider.getLoggerByName "!!!"
+                logger.fatal(!!!  message)
                 let actual = provider.MessageThunk.Value()
                 Expect.equal actual "test message" ""
 
@@ -196,13 +209,13 @@ let tests =
                 let provider = getNewProvider()
                 let parameter = "someParmeter"
                 let logger = LogProvider.getLoggerByName ">>!"
-                logger.fatal(!! "" >>! parameter )
+                logger.fatal(!!!  "" >>! parameter )
                 let actual = provider.Parameters
                 Expect.equal actual [|parameter|] ""
 
             testCase "addParameters" <| fun _ ->
                 let provider = getNewProvider()
-                let parameters = ["someParmeter"] |> List.map box
+                let parameters = [ box "someParmeter"] // |> List.map box
                 let logger = LogProvider.getLoggerByName "addParameters"
                 logger.fatal(Log.addParameters parameters)
                 let actual = provider.Parameters
@@ -219,7 +232,7 @@ let tests =
                 let provider = getNewProvider()
                 let parameter = "someParmeter"
                 let logger = LogProvider.getLoggerByName ">>!-"
-                logger.fatal(!!"" >>!- ("name",parameter))
+                logger.fatal(!!! "" >>!- ("name",parameter))
                 Expect.contains provider.Contexts ("name",false, box parameter) ""
 
             testCase "addContextDestructured" <| fun _ ->
@@ -233,7 +246,7 @@ let tests =
                 let provider = getNewProvider()
                 let parameter = "someParmeter"
                 let logger = LogProvider.getLoggerByName ">>!+"
-                logger.fatal(!!"" >>!+ ("name",parameter))
+                logger.fatal(!!! "" >>!+ ("name",parameter))
                 Expect.contains provider.Contexts ("name",true, box parameter) ""
 
             testCase "addException" <| fun _ ->
@@ -256,7 +269,7 @@ let tests =
                 let provider = getNewProvider()
                 let ex = Exception()
                 let logger = LogProvider.getLoggerByName ">>!!"
-                logger.fatal(!! "" >>!! ex)
+                logger.fatal(!!!  "" >>!! ex)
                 let actual = provider.Exception
                 Expect.equal actual (Some ex) ""
 
@@ -284,7 +297,7 @@ let tests =
                 let provider = getNewProvider()
                 use __ = LogProvider.openNestedContext parameter
                 Expect.contains provider.Contexts ("NDC",false, box parameter) ""
-
+#if !FABLE_COMPILER
             testCase "setMessageInterpolated simple" <| fun _ ->
                 let parameter = "problemChild123"
                 let provider = getNewProvider()
@@ -314,7 +327,7 @@ let tests =
                 Expect.equal actualMessage "This {user} did something with this" ""
                 provider.Contexts |> Seq.iter(printfn "%A")
                 Expect.contains provider.Contexts ("user",true, box parameter) ""
-
+#endif
         ]
 
     ]

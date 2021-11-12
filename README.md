@@ -60,7 +60,7 @@ open FsLibLog.Types
 
 ### Get a logger
 
-There are currently three ways to get a logger.
+There are currently six ways to get a logger.
 
 - `getCurrentLogger` - __Deprecated__ because inferring the correct StackFrame is too difficult. Creates a logger. It's name is based on the current StackFrame.
 - `getLoggerByFunc` - Creates a logger based on `Reflection.MethodBase.GetCurrentMethod` call.  This is only useful for calls within functions.
@@ -68,6 +68,13 @@ There are currently three ways to get a logger.
 - `getLoggerFor` - Creates a logger given a `'a` type.
 - `getLoggerByType` - Creates a logger given a `Type`.
 - `getLoggerByName` - Creates a logger given a `string`.
+
+**Fable** libraries can only use the following:
+- `getLoggerByType`
+- `getLoggerByName`
+- `getLoggerFor`
+
+The other functions rely reflection and thus are only available when compiling on `dotnet`.
 
 ### Set the loglevel, message, exception and parameters
 
@@ -181,7 +188,7 @@ module Say =
     // Has the same logging output as `hello`, above, but uses the Operators module.
     let helloWithOperators name =
         // Initiate a log with a message
-        !! "{name} Was said hello to"
+        !!! "{name} Was said hello to"
         // Add a parameter
         >>! name
         // Adds a value, but does not destructure it.
@@ -253,6 +260,40 @@ You can implement and teach FsLibLog about your own custom provider if one is no
 1. You have to implement the `ILogProvider` interface. [Example Implemenation](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/ConsoleExample/Program.fs#L5-L90)
 2. You have to tell FsLibLog to use it. [Example calling FsLibLog.LogProvider.setLoggerProvider](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/ConsoleExample/Program.fs#L94)
     1. One downside to this is you need to do this for every library your application consumes that uses FsLiblog.
+
+### Using the Example JsConsoleProvider
+
+This can look something like [JsConsoleProvider](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/JsConsoleProvider/JsConsoleProvider.fs), with simple & direct logging to console. Other log providers, such as one to ship front-end logs to a back-end service, are left as an exercise for the reader.
+
+#### Option 1
+
+Copy/paste [JsConsoleProvider.fs](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/JsConsoleProvider/JsConsoleProvider.fs) into your library.
+
+#### Option 2
+
+Read over [Paket Github dependencies](https://fsprojects.github.io/Paket/github-dependencies.html).
+
+Add the following line to your `paket.depedencies` file.
+
+```
+github TheAngryByrd/FsLibLog examples/JsConsoleProvider.JsConsoleProvider.fs
+```
+
+Then add the following line to projects with `paket.references` file you want the console provider to be available to.
+
+```
+File: JsConsoleProvider.fs
+```
+
+### Register the Log Provider
+
+Note that the log provider must be registered manually in a Fable application, like so:
+
+```
+LogProvider.setLoggerProvider <| JsConsoleProvider.create()
+```
+
+From there, the logger can be used as normal.
 
 ---
 
