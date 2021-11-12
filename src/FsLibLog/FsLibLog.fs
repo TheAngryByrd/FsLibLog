@@ -1012,6 +1012,8 @@ module Providers =
 
         let create () = MicrosoftProvider() :> ILogProvider
 
+#endif
+
 module LogProvider =
     open System
     open Types

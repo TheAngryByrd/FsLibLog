@@ -10,7 +10,7 @@ let allTests = testList "All Tests" [
     Tests.tests
 ]
 
-// [<EntryPoint>]
+[<EntryPoint>]
 let main argv =
     #if FABLE_COMPILER
     printfn "Running tests"
