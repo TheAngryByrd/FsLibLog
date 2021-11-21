@@ -442,10 +442,11 @@ var assemblies = [
   {
     "name": "FsLibLog",
     "classes": [
-      { "name": "FsLibLog.LogProvider", "rp": "FsLibLog_LogProvider.htm", "cl": 14, "ucl": 89, "cal": 103, "tl": 1214, "ct": "LineCoverage", "mc": "-", "cb": 4, "tb": 24, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.Operators", "rp": "FsLibLog_Operators.htm", "cl": 4, "ucl": 10, "cal": 14, "tl": 1214, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.Providers", "rp": "FsLibLog_Providers.htm", "cl": 0, "ucl": 498, "cal": 498, "tl": 1214, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 39, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.Types", "rp": "FsLibLog_Types.htm", "cl": 92, "ucl": 110, "cal": 202, "tl": 1214, "ct": "LineCoverage", "mc": "-", "cb": 7, "tb": 18, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.LogProvider", "rp": "FsLibLog_LogProvider.htm", "cl": 14, "ucl": 63, "cal": 77, "tl": 1216, "ct": "LineCoverage", "mc": "-", "cb": 4, "tb": 16, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.LogProviderModule", "rp": "FsLibLog_LogProviderModule.htm", "cl": 0, "ucl": 30, "cal": 30, "tl": 1216, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 8, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Operators", "rp": "FsLibLog_Operators.htm", "cl": 4, "ucl": 10, "cal": 14, "tl": 1216, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Providers", "rp": "FsLibLog_Providers.htm", "cl": 0, "ucl": 498, "cal": 498, "tl": 1216, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 39, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Types", "rp": "FsLibLog_Types.htm", "cl": 92, "ucl": 110, "cal": 202, "tl": 1216, "ct": "LineCoverage", "mc": "-", "cb": 7, "tb": 18, "lch": [], "bch": [], "hc": [] },
       { "name": "System.AssemblyVersionInformation", "rp": "FsLibLog_AssemblyVersionInformation.htm", "cl": 0, "ucl": 0, "cal": 0, "tl": 0, "ct": "MethodCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
     ]},
 ];

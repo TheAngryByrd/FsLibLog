@@ -1,3 +1,5 @@
+#### 0.8.1 - 2021-11-21
+* BUGFIX: [Fixes getLoggerByFunc for computation expressions](https://github.com/TheAngryByrd/FsLibLog/pull/26)
 #### 0.8.0 - 2021-11-12
 * FEATURE: [Adds Fable support](https://github.com/TheAngryByrd/FsLibLog/pull/21). Operators have a breaking change from (!!) to (!!!) to avoid overlap with Fable's unboxing operator. Credits [@PaigeM89](https://github.com/PaigeM89)
 #### 0.7.0 - 2021-10-27
