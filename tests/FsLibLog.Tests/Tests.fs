@@ -70,6 +70,10 @@ let private getNewProvider () =
 let someFunction () =
     let logger = LogProvider.getLoggerByFunc()
     ()
+let someAsyncFunction () = async {
+    let logger = LogProvider.getLoggerByFunc()
+    ()
+}
 #endif
 
 type Dog = {
@@ -88,6 +92,11 @@ let tests =
                 let provider = getNewProvider()
                 someFunction()
                 Expect.equal provider.LoggerName "Tests.someFunction" ""
+            testCaseAsync "LogProvider.getLoggerByFunc async CE" <| async {
+                let provider = getNewProvider()
+                do! someAsyncFunction()
+                Expect.equal provider.LoggerName "Tests.someAsyncFunction" ""
+            }
 
             testCase "LogProvider.getLoggerByQuotation" <| fun _ ->
                 Expect.equal SomeOtherModule.provider.LoggerName "Tests+SomeOtherModule" ""

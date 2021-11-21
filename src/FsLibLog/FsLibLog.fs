@@ -1014,6 +1014,7 @@ module Providers =
 
 #endif
 
+
 module LogProvider =
     open System
     open Types
@@ -1186,22 +1187,6 @@ module LogProvider =
 
     /// **Description**
     ///
-    /// Creates a logger based on `Reflection.MethodBase.GetCurrentMethod` call.  This is only useful for calls within functions.  This does not protect against inlined functions.
-    ///
-    /// **Output Type**
-    ///   * `ILog`
-    ///
-    /// **Exceptions**
-    ///
-    let inline getLoggerByFunc () =
-        let mi = Reflection.MethodBase.GetCurrentMethod()
-
-        sprintf "%s.%s" mi.DeclaringType.FullName mi.Name
-        |> getLoggerByName
-
-
-    /// **Description**
-    ///
     /// Creates a logger. It's name is based on the current StackFrame. This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
     /// Obsolete: getCurrentLogger is obsolete, choose another provider factory function.
     ///
@@ -1211,4 +1196,21 @@ module LogProvider =
     let getCurrentLogger () =
         let stackFrame = StackFrame(2, false)
         getLoggerByType (stackFrame.GetMethod().DeclaringType)
+
+
+type LogProvider =
+    /// <summary>
+    /// Creates a logger based on `Reflection.MethodBase.GetCurrentMethod().FullName` and `CallerMemberName`. This is only useful for calls within functions. Results may vary on lambda and inlined functions.
+    /// </summary>
+    /// <param name="memberName">Do not pass anything to this parameter to get `CallerMemberName` to work.</param>
+    /// <returns></returns>
+    static member inline getLoggerByFunc([<System.Runtime.CompilerServices.CallerMemberName>] ?memberName: string) =
+        let mi = System.Reflection.MethodBase.GetCurrentMethod()
+        // When we're in a CE we get something like `WebBackend.App+thingsToCall2@130`.
+        // CallerMemberName gets us the function that actually called it
+        // Splitting off + seems like the best option to get the Fully Qualified Path
+        let location = mi.DeclaringType.FullName.Split('+') |> Seq.tryHead |> Option.defaultValue ""
+        sprintf "%s.%s" location memberName.Value
+        |> LogProvider.getLoggerByName
+
 #endif
