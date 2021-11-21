@@ -17,8 +17,8 @@ module Types =
 
     /// An optional message thunk.
     ///
-    /// - If `None` is provided, this typically signals to the logger to do a isEnabled check.
-    /// - If `Some` is provided, this signals the logger to log.
+    /// - If <see cref="T:Microsoft.FSharp.Core.Option<_>.None">None</see> is provided, this typically signals to the logger to do a isEnabled check.
+    /// - If <see cref="T:Microsoft.FSharp.Core.Option<_>.Some">Some</see> is provided, this signals the logger to log.
     type MessageThunk = (unit -> string) option
 
     /// The signature of a log message function
@@ -40,7 +40,7 @@ module Types =
               Parameters = List.empty
               AdditionalNamedParameters = List.empty }
 
-    /// An interface wrapper for `Logger`. Useful when using depedency injection frameworks.
+    /// An interface wrapper for a<see cref="T:FsLibLog.Types.Logger">Logger</see>. Useful when using depedency injection frameworks.
     type ILog =
         abstract member Log :  Logger
         abstract member MappedContext :  MappedContext
@@ -80,6 +80,10 @@ module Types =
 #if !FABLE_COMPILER
         open System.Collections.Generic
 #endif
+
+        /// <summary>
+        /// DisposableStack on Dispose will call dispose on items appended to its stack in Last In First Out.
+        /// </summary>
         type DisposableStack() =
             let stack = Stack<IDisposable>()
 
@@ -98,15 +102,11 @@ module Types =
 
         type ILog with
 
-            /// **Description**
-            ///
+            /// <summary>
             /// Logs a log
-            ///
-            /// **Parameters**
-            ///   * `log` - parameter of type `Log`
-            ///
-            /// **Output Type**
-            ///   * `bool`
+            /// </summary>
+            /// <param name="log">The type representing a log message to be logged</param>
+            /// <returns><see langword="true"/> if the log message was logged</returns>
             member logger.fromLog(log: Log) =
                 use __ =
                     log.AdditionalNamedParameters
@@ -118,154 +118,100 @@ module Types =
                 |> List.toArray
                 |> logger.Log log.LogLevel log.Message log.Exception
 
-            /// **Description**
-            ///
-            /// Logs a fatal log message given a log configurer.  Lets caller know if log was sent with boolean return.
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `bool`
+            /// <summary>
+            /// Logs a fatal log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
+            /// <returns><see langword="true"/>  if the log message was logged</returns>
             member logger.fatal'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Fatal
                 |> logConfig
                 |> logger.fromLog
 
-            /// **Description**
-            ///
-            /// Logs a fatal log message given a log configurer
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `unit`
+            /// <summary>
+            /// Logs a fatal log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
             member logger.fatal(logConfig: Log -> Log) = logger.fatal' logConfig |> ignore
 
-            /// **Description**
-            ///
-            /// Logs a error log message given a log configurer.  Lets caller know if log was sent with boolean return.
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `bool`
+            /// <summary>
+            /// Logs an error log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
+            /// <returns><see langword="true"/>  if the log message was logged</returns>
             member logger.error'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Error
                 |> logConfig
                 |> logger.fromLog
 
-            /// **Description**
-            ///
-            /// Logs an error log message given a log configurer
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `unit`
+            /// <summary>
+            /// Logs an error log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
             member logger.error(logConfig: Log -> Log) = logger.error' logConfig |> ignore
 
-            /// **Description**
-            ///
-            /// Logs a warn log message given a log configurer.  Lets caller know if log was sent with boolean return.
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `bool`
+            /// <summary>
+            /// Logs a warn log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
+            /// <returns><see langword="true"/>  if the log message was logged</returns>
             member logger.warn'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Warn
                 |> logConfig
                 |> logger.fromLog
 
-            /// **Description**
-            ///
-            /// Logs a warn log message given a log configurer
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `unit`
+            /// <summary>
+            /// Logs a warn log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
             member logger.warn(logConfig: Log -> Log) = logger.warn' logConfig |> ignore
 
-            /// **Description**
-            ///
-            /// Logs a info log message given a log configurer.  Lets caller know if log was sent with boolean return.
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `bool`
+            /// <summary>
+            /// Logs an info log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
+            /// <returns><see langword="true"/>  if the log message was logged</returns>
             member logger.info'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Info
                 |> logConfig
                 |> logger.fromLog
 
-            /// **Description**
-            ///
-            /// Logs a info log message given a log configurer
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `unit`
+            /// <summary>
+            /// Logs an info log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
             member logger.info(logConfig: Log -> Log) = logger.info' logConfig |> ignore
 
-            /// **Description**
-            ///
-            /// Logs a debug log message given a log configurer.  Lets caller know if log was sent with boolean return.
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `bool`
+            /// <summary>
+            /// Logs a debug log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
+            /// <returns><see langword="true"/>  if the log message was logged</returns>
             member logger.debug'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Debug
                 |> logConfig
                 |> logger.fromLog
 
-            /// **Description**
-            ///
-            /// Logs a debug log message given a log configurer
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `unit`
+            /// <summary>
+            /// Logs a debug log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
             member logger.debug(logConfig: Log -> Log) = logger.debug' logConfig |> ignore
 
-            /// **Description**
-            ///
-            /// Logs a trace log message given a log configurer.  Lets caller know if log was sent with boolean return.
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `bool`
+            /// <summary>
+            /// Logs a trace log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
+            /// <returns><see langword="true"/>  if the log message was logged</returns>
             member logger.trace'(logConfig: Log -> Log) =
                 Log.StartLogLevel LogLevel.Trace
                 |> logConfig
                 |> logger.fromLog
 
-            /// **Description**
-            ///
-            /// Logs a trace log message given a log configurer
-            ///
-            /// **Parameters**
-            ///   * `logConfig` - parameter of type `Log -> Log`
-            ///
-            /// **Output Type**
-            ///   * `unit`
+            /// <summary>
+            /// Logs a trace log message given a log configurer.
+            /// </summary>
+            /// <param name="logConfig">A function to configure a log</param>
             member logger.trace(logConfig: Log -> Log) = logger.trace' logConfig |> ignore
 
 
@@ -334,7 +280,6 @@ module Types =
                   AdditionalNamedParameters = List.append log.AdditionalNamedParameters [ key, (box value), false ] }
 
 
-        /// **Description**
         /// <summary>
         /// Amends a <see cref="T:FsLibLog.Types.Log">Log</see> with additional named parameters for context. This helper adds more context to a log.
         /// This DOES NOT affect the parameters set for a message template.
@@ -1047,33 +992,29 @@ module LogProvider =
         { new IDisposable with
             member __.Dispose() = () }
 
-    /// **Description**
-    ///
-    /// Allows custom override when `getLogger` searches for a LogProvider.
-    ///
-    /// **Parameters**
-    ///   * `provider` - parameter of type `ILogProvider`
-    ///
-    /// **Output Type**
-    ///   * `unit`
+    /// <summary>
+    /// Allows custom override when a <c>getLogger</c> function searches for a LogProvider.
+    /// </summary>
+    /// <param name="logProvider">The <see cref="M:FsLibLog.Types.ILogProvider"/> to set</param>
+    /// <returns></returns>
     let setLoggerProvider (logProvider: ILogProvider) = currentLogProvider <- Some logProvider
 
+    /// <summary>
+    /// Gets the currently set LogProvider or attempts to find known built in providers
+    /// </summary>
+    /// <returns></returns>
     let getCurrentLogProvider () =
         match currentLogProvider with
         | None -> resolvedLogger.Value
         | Some p -> Some p
 
-    /// **Description**
-    ///
+    /// <summary>
     /// Opens a mapped diagnostic context.  This will allow you to set additional parameters to a log given a scope.
-    ///
-    /// **Parameters**
-    ///   * `key` - parameter of type `string` - The name of the property.
-    ///   * `value` - parameter of type `obj` - The value of the property.
-    ///   * `destructureObjects` - parameter of type `bool` - If true, and the value is a non-primitive, non-array type, then the value will be converted to a structure; otherwise, unknown types will be converted to scalars, which are generally stored as strings. WARNING: Destructring can be expensive.
-    ///
-    /// **Output Type**
-    ///   * `IDisposable`
+    /// </summary>
+    /// <param name="key">The name of the property.</param>
+    /// <param name="value">The value of the property.</param>
+    /// <param name="destructureObjects">If true, and the value is a non-primitive, non-array type, then the value will be converted to a structure; otherwise, unknown types will be converted to scalars, which are generally stored as strings. WARNING: Destructring can be expensive.</param>
+    /// <returns>An IDisposable upon disposing will remove this value from a loggers scope</returns>
     let openMappedContextDestucturable (key: string) (value: obj) (destructureObjects: bool) =
         let provider = getCurrentLogProvider ()
 
@@ -1081,29 +1022,23 @@ module LogProvider =
         | Some p -> p.OpenMappedContext key value destructureObjects
         | None -> noopDisposable
 
-    /// **Description**
-    ///
+
+    /// <summary>
     /// Opens a mapped diagnostic context.  This will allow you to set additional parameters to a log given a scope. Sets destructureObjects to false.
-    ///
-    /// **Parameters**
-    ///   * `key` - parameter of type `string` - The name of the property.
-    ///   * `value` - parameter of type `obj` - The value of the property.
-    ///
-    /// **Output Type**
-    ///   * `IDisposable`
+    /// </summary>
+    /// <param name="key">The name of the property.</param>
+    /// <param name="value">The value of the property.</param>
+    /// <returns>An IDisposable upon disposing will remove this value from a loggers scope</returns>
     let openMappedContext (key: string) (value: obj) =
         //TODO: We should try to find out if the value is a primitive
         openMappedContextDestucturable key value false
 
-    /// **Description**
-    ///
+
+    /// <summary>
     /// Opens a nested diagnostic context.  This will allow you to set additional parameters to a log given a scope.
-    ///
-    /// **Parameters**
-    ///   * `value` - parameter of type `string` - The value of the property.
-    ///
-    /// **Output Type**
-    ///   * `IDisposable`
+    /// </summary>
+    /// <param name="value">The value of the property</param>
+    /// <returns>An IDisposable upon disposing will remove this value from a loggers scope</returns>
     let openNestedContext (value: string) =
         let provider = getCurrentLogProvider ()
 
@@ -1111,15 +1046,11 @@ module LogProvider =
         | Some p -> p.OpenNestedContext value
         | None -> noopDisposable
 
-    /// **Description**
-    ///
-    /// Creates a logger given a `string`.  This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
-    ///
-    /// **Parameters**
-    ///   * `string` - parameter of type `string`
-    ///
-    /// **Output Type**
-    ///   * `ILog`
+    /// <summary>
+    /// Creates a logger given a <see cref="T:System.String">string</see>. This will attempt to retrieve any loggers set with <see cref="M:FsLibLog.LogProviderModule.setLoggerProvider">Log.setLoggerProvider</see>.  It will fallback to a known list of providers.
+    /// </summary>
+    /// <param name="name">A name to give a logger. This can help you identify the location of where the log occurred upon reviewing the logs.</param>
+    /// <returns></returns>
     let getLoggerByName (name: string) =
         let loggerProvider = getCurrentLogProvider ()
 
@@ -1132,31 +1063,22 @@ module LogProvider =
             member x.Log = logFunc
             member x.MappedContext = openMappedContextDestucturable }
 
-    /// **Description**
-    ///
-    /// Creates a logger given a `Type`.  This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
-    ///
-    /// **Parameters**
-    ///   * `type` - parameter of type `Type`
-    ///
-    /// **Output Type**
-    ///   * `ILog`
+    /// <summary>
+    /// Creates a logger given a <see cref="T:System.Type">Type</see>.  This will attempt to retrieve any loggers set with <see cref="M:FsLibLog.LogProviderModule.setLoggerProvider">Log.setLoggerProvider</see>.  It will fallback to a known list of providers.
+    /// </summary>
+    /// <param name="``type``">The type to generate a logger name from. </param>
+    /// <returns></returns>
     let getLoggerByType (``type``: Type) = ``type`` |> string |> getLoggerByName
 
-    /// **Description**
-    ///
-    /// Creates a logger given a `'a` type. This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
-    ///
-    /// **Output Type**
-    ///   * `ILog`
-    ///
+    /// <summary>
+    /// Creates a logger given a <c>'a</c> type. This will attempt to retrieve any loggers set with <see cref="M:FsLibLog.LogProviderModule.setLoggerProvider">Log.setLoggerProvider</see>.  It will fallback to a known list of providers.
+    /// </summary>
+    /// <typeparam name="'a">The type to generate a name from.</typeparam>
+    /// <returns></returns>
     let inline getLoggerFor<'a> () = getLoggerByType (typeof<'a>)
 
-
-// Can't access StackFrame in Fable
-// `GetCurrentMethod()` returns null in Fable
 #if !FABLE_COMPILER
-    let rec getModuleType =
+    let rec private getModuleType =
         function
         | PropertyGet (_, propertyInfo, _) -> propertyInfo.DeclaringType
         // | Call (_, methInfo, _) -> sprintf "%s.%s" methInfo.DeclaringType.FullName methInfo.Name
@@ -1164,8 +1086,8 @@ module LogProvider =
         // | ValueWithName(_,_,instance) -> instance
         | x -> failwithf "Expression is not a property. %A" x
 
-    /// **Description**
-    ///
+
+    /// <summary>
     /// Creates a logger given a Quotations.Expr type. This is only useful for module level declarations. It uses the DeclaringType on the PropertyInfo of the PropertyGet.
     ///
     /// It can be utilized like:
@@ -1173,29 +1095,11 @@ module LogProvider =
     /// `let rec logger = LogProvider.getLoggerByQuotation <@ logger @>`
     ///
     /// inside a module to get the modules full qualitfied name.
-    ///
-    /// **Parameters**
-    ///   * `quotation` - parameter of type `Quotations.Expr`
-    ///
-    /// **Output Type**
-    ///   * `ILog`
-    ///
-    /// **Exceptions**
-    ///
+    /// </summary>
+    /// <param name="quotation">The quotation to generate a logger name from.</param>
+    /// <returns></returns>
     let getLoggerByQuotation (quotation: Quotations.Expr) =
         getModuleType quotation |> getLoggerByType
-
-    /// **Description**
-    ///
-    /// Creates a logger. It's name is based on the current StackFrame. This will attempt to retrieve any loggers set with `setLoggerProvider`.  It will fallback to a known list of providers.
-    /// Obsolete: getCurrentLogger is obsolete, choose another provider factory function.
-    ///
-    /// **Output Type**
-    ///   * `ILog`
-    [<Obsolete("getCurrentLogger is obsolete, choose another provider factory function")>]
-    let getCurrentLogger () =
-        let stackFrame = StackFrame(2, false)
-        getLoggerByType (stackFrame.GetMethod().DeclaringType)
 
 
 type LogProvider =

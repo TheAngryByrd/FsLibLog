@@ -13,8 +13,6 @@ module Say =
 #if !FABLE_COMPILER
     // let logger = LogProvider.getLoggerByName "SomeLibrary.Say"
     let rec logger = LogProvider.getLoggerByQuotation <@ logger @>
-
-    let rec myModule = LogProvider.getModuleType <@ myModule @>
 #else
     let logger = LogProvider.getLoggerByName "SomeLib.Say"
 #endif
