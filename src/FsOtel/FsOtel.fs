@@ -36,25 +36,28 @@ type ActivityExtensions =
             .SetTagSafe("otel.status_code","ERROR")
             .SetTagSafe("otel.status_description", description)
 
-
 [<Extension>]
 type ActivitySourceExtensions =
     [<Extension>]
-    static member inline StartActivityForType(tracer : ActivitySource, ``type`` : Type) =
-        ``type`` |> string |> tracer.StartActivity
-
-    [<Extension>]
-    static member inline StartActivityFor<'a>(tracer : ActivitySource) =
-        ActivitySourceExtensions.StartActivityForType (tracer, typeof<'a>)
-
-    [<Extension>]
-    static member inline StartActivityForFunc(tracer : ActivitySource) =
+    static member inline StartActivityForName(
+            tracer : ActivitySource,
+            name: string,
+            [<CallerMemberName>] ?memberName: string,
+            [<CallerFilePath>] ?path: string,
+            [<CallerLineNumberAttribute>] ?line: int) =
         let mi = Reflection.MethodBase.GetCurrentMethod()
-        sprintf "%s.%s" mi.DeclaringType.FullName mi.Name
-        |> tracer.StartActivity
+        let ``namespace`` = mi.DeclaringType.FullName.Split("+") |> Seq.tryHead |> Option.defaultValue ""
+        let span =
+            name
+            |> tracer.StartActivity
+        span
+            .SetTagSafe("code.filepath", path.Value)
+            .SetTagSafe("code.lineno", line.Value)
+            .SetTagSafe("code.namespace", ``namespace``)
+            .SetTagSafe("code.function", memberName.Value)
 
     [<Extension>]
-    static member inline StartActiveSpanForFunc(
+    static member inline StartActivityForFunc(
             tracer : ActivitySource,
             [<CallerMemberName>] ?memberName: string,
             [<CallerFilePath>] ?path: string,

@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
-    <Title>FsLibLog</Title>
-    <Description>FsLibLog does the thing!</Description>
+    <Title>FsOtel</Title>
+    <Description>FsOtel does the thing!</Description>
     <!-- summary is not migrated from project.json, but you can use the <Description> property for that if needed. -->
     <PackageTags>f#, fsharp</PackageTags>
-    <PackageProjectUrl>https://github.com/TheAngryByrd/FsLibLog</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/TheAngryByrd/FsLibLog/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/TheAngryByrd/FsOtel</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/TheAngryByrd/FsOtel/blob/master/LICENSE.md</PackageLicenseUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
     <Authors>TheAngryByrd</Authors>
-    <RepositoryUrl>https://github.com/TheAngryByrd/FsLibLog</RepositoryUrl>
+    <RepositoryUrl>https://github.com/TheAngryByrd/FsOtel</RepositoryUrl>
     <!-- owners is not supported in MSBuild -->
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -24,7 +24,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="FsLibLog.fs" />
+    <Compile Include="FsOtel.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

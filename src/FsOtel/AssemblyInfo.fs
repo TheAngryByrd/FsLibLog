@@ -2,7 +2,7 @@
 namespace System
 open System.Reflection
 
-[<assembly: AssemblyTitleAttribute("FsLibLog.Tests")>]
+[<assembly: AssemblyTitleAttribute("FsOtel")>]
 [<assembly: AssemblyProductAttribute("FsLibLog")>]
 [<assembly: AssemblyVersionAttribute("0.9.0")>]
 [<assembly: AssemblyMetadataAttribute("ReleaseDate","2021-11-21T00:00:00.0000000")>]
@@ -13,7 +13,7 @@ open System.Reflection
 do ()
 
 module internal AssemblyVersionInformation =
-    let [<Literal>] AssemblyTitle = "FsLibLog.Tests"
+    let [<Literal>] AssemblyTitle = "FsOtel"
     let [<Literal>] AssemblyProduct = "FsLibLog"
     let [<Literal>] AssemblyVersion = "0.9.0"
     let [<Literal>] AssemblyMetadata_ReleaseDate = "2021-11-21T00:00:00.0000000"
