@@ -1066,9 +1066,9 @@ module LogProvider =
     /// <summary>
     /// Creates a logger given a <see cref="T:System.Type">Type</see>.  This will attempt to retrieve any loggers set with <see cref="M:FsLibLog.LogProviderModule.setLoggerProvider">Log.setLoggerProvider</see>.  It will fallback to a known list of providers.
     /// </summary>
-    /// <param name="``type``">The type to generate a logger name from. </param>
+    /// <param name="objectType">The type to generate a logger name from. </param>
     /// <returns></returns>
-    let getLoggerByType (``type``: Type) = ``type`` |> string |> getLoggerByName
+    let getLoggerByType (objectType: Type) = objectType |> string |> getLoggerByName
 
     /// <summary>
     /// Creates a logger given a <c>'a</c> type. This will attempt to retrieve any loggers set with <see cref="M:FsLibLog.LogProviderModule.setLoggerProvider">Log.setLoggerProvider</see>.  It will fallback to a known list of providers.
@@ -1092,7 +1092,9 @@ module LogProvider =
     ///
     /// It can be utilized like:
     ///
-    /// `let rec logger = LogProvider.getLoggerByQuotation <@ logger @>`
+    /// <code>
+    /// let rec logger = LogProvider.getLoggerByQuotation &lt;@ logger @&gt;
+    /// </code>
     ///
     /// inside a module to get the modules full qualitfied name.
     /// </summary>
