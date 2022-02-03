@@ -442,11 +442,11 @@ var assemblies = [
   {
     "name": "FsLibLog",
     "classes": [
-      { "name": "FsLibLog.LogProvider", "rp": "FsLibLog_LogProvider.htm", "cl": 14, "ucl": 62, "cal": 76, "tl": 1120, "ct": "LineCoverage", "mc": "-", "cb": 4, "tb": 16, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.LogProviderModule", "rp": "FsLibLog_LogProviderModule.htm", "cl": 0, "ucl": 28, "cal": 28, "tl": 1120, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 8, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.Operators", "rp": "FsLibLog_Operators.htm", "cl": 4, "ucl": 11, "cal": 15, "tl": 1120, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.Providers", "rp": "FsLibLog_Providers.htm", "cl": 0, "ucl": 480, "cal": 480, "tl": 1120, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 39, "lch": [], "bch": [], "hc": [] },
-      { "name": "FsLibLog.Types", "rp": "FsLibLog_Types.htm", "cl": 92, "ucl": 105, "cal": 197, "tl": 1120, "ct": "LineCoverage", "mc": "-", "cb": 7, "tb": 18, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.LogProvider", "rp": "FsLibLog_LogProvider.htm", "cl": 14, "ucl": 61, "cal": 75, "tl": 1122, "ct": "LineCoverage", "mc": "-", "cb": 4, "tb": 16, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.LogProviderModule", "rp": "FsLibLog_LogProviderModule.htm", "cl": 0, "ucl": 28, "cal": 28, "tl": 1122, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 8, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Operators", "rp": "FsLibLog_Operators.htm", "cl": 4, "ucl": 11, "cal": 15, "tl": 1122, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Providers", "rp": "FsLibLog_Providers.htm", "cl": 0, "ucl": 480, "cal": 480, "tl": 1122, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 39, "lch": [], "bch": [], "hc": [] },
+      { "name": "FsLibLog.Types", "rp": "FsLibLog_Types.htm", "cl": 92, "ucl": 105, "cal": 197, "tl": 1122, "ct": "LineCoverage", "mc": "-", "cb": 7, "tb": 18, "lch": [], "bch": [], "hc": [] },
       { "name": "System.AssemblyVersionInformation", "rp": "FsLibLog_AssemblyVersionInformation.htm", "cl": 0, "ucl": 0, "cal": 0, "tl": 0, "ct": "MethodCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
     ]},
 ];

@@ -1,3 +1,6 @@
+#### 0.9.1 - 2022-02-03
+* BUGFIX: [fixing doc comment warnings](https://github.com/TheAngryByrd/FsLibLog/pull/30)
+
 #### 0.9.0 - 2021-11-21
 * BREAKING: [Removes getCurrentLogger function](https://github.com/TheAngryByrd/FsLibLog/pull/28)
 * DOCS: [Cleans up DocComments to be in line with dotnets XML standard](https://github.com/TheAngryByrd/FsLibLog/pull/28)
