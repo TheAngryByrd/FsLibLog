@@ -24,12 +24,36 @@ BuildServer.install [
 // Metadata and Configuration
 //-----------------------------------------------------------------------------
 
+let rootDir = __SOURCE_DIRECTORY__
 
 let release = Fake.Core.ReleaseNotes.load "RELEASE_NOTES.md"
 let productName = "FsLibLog"
 let sln = "FsLibLog.sln"
 let srcGlob =__SOURCE_DIRECTORY__  @@ "src/**/*.??proj"
 let testsGlob = __SOURCE_DIRECTORY__  @@ "tests/**/*.??proj"
+
+let srcCodeGlob =
+    !! (rootDir  </> "src/**/*.fs")
+    ++ (rootDir  </> "src/**/*.fsx")
+    -- (rootDir  </> "src/**/obj/**/*.fs")
+
+
+let adaptersCodeGlob =
+    !! (rootDir  </> "adapters/**/*.fs")
+    ++ (rootDir  </> "adapters/**/*.fsx")
+    -- (rootDir  </> "adapters/**/obj/**/*.fs")
+
+let examplesCodeGlob =
+    !! (rootDir  </> "examples/**/*.fs")
+    ++ (rootDir  </> "examples/**/*.fsx")
+    -- (rootDir  </> "examples/**/obj/**/*.fs")
+
+
+let testsCodeGlob =
+    !! (rootDir  </> "tests/**/*.fs")
+    ++ (rootDir  </> "tests/**/*.fsx")
+    -- (rootDir  </> "tests/**/obj/**/*.fs")
+
 
 let srcAndTest =
     !! srcGlob
@@ -94,14 +118,16 @@ module dotnet =
         DotNet.exec optionConfig (sprintf "%s" command) args
         |> failOnBadExitAndPrint
 
-    let fantomas optionConfig args =
-        tool optionConfig "fantomas" args
+    let fantomas args =
+        DotNet.exec id "fantomas" args
 
     let reportgenerator optionConfig args =
         tool optionConfig "reportgenerator" args
 
     let sourcelink optionConfig args =
         tool optionConfig "sourcelink" args
+
+
 
 
 
@@ -243,7 +269,7 @@ Target.create "AssemblyInfo" <| fun _ ->
           AssemblyInfo.Metadata("GitHash", Git.Information.getCurrentSHA1(null))
         ]
 
-    let getProjectDetails projectPath =
+    let getProjectDetails (projectPath : string) =
         let projectName = IO.Path.GetFileNameWithoutExtension(projectPath)
         ( projectPath,
           projectName,
@@ -321,14 +347,53 @@ Target.create "GitHubRelease" <| fun _ ->
    |> GitHub.publishDraft
    |> Async.RunSynchronously
 
-Target.create "FormatCode" <| fun _ ->
-    srcAndTest
-    |> Seq.map (IO.Path.GetDirectoryName)
-    |> Seq.iter (fun projDir ->
-        dotnet.fantomas id (sprintf "--recurse %s" projDir)
-    )
+
+let formatCode _ =
+    let result =
+        [
+            srcCodeGlob
+            testsCodeGlob
+            adaptersCodeGlob
+            examplesCodeGlob
+        ]
+        |> Seq.collect id
+        // Ignore AssemblyInfo
+        |> Seq.filter(fun f -> f.EndsWith("AssemblyInfo.fs") |> not)
+        |> String.concat " "
+        |> dotnet.fantomas
+
+    if not result.OK then
+        Trace.traceErrorfn "Errors while formatting all files: %A" result.Messages
+
+
+let checkFormatCode _ =
+    let result =
+        [
+            srcCodeGlob
+            testsCodeGlob
+            adaptersCodeGlob
+            examplesCodeGlob
+        ]
+        |> Seq.collect id
+        // Ignore AssemblyInfo
+        |> Seq.filter(fun f -> f.EndsWith("AssemblyInfo.fs") |> not)
+        |> String.concat " "
+        |> sprintf "%s --check"
+        |> dotnet.fantomas
+
+    if result.ExitCode = 0 then
+        Trace.log "No files need formatting"
+    elif result.ExitCode = 99 then
+        failwith "Some files need formatting, check output for more info"
+    else
+        Trace.logf "Errors while formatting: %A" result.Errors
+
+
+Target.create "FormatCode" formatCode
+Target.create "CheckFormatCode" checkFormatCode
 
 Target.create "Release" ignore
+
 
 // Only call Clean if DotnetPack was in the call chain
 // Ensure Clean is called before DotnetRestore
@@ -344,6 +409,7 @@ Target.create "Release" ignore
 "RunNpmInstall" ==> "RunNpmTests"
 
 "DotnetRestore"
+  ==> "CheckFormatCode"
   ==> "DotnetBuild"
   ==> "DotnetTest"
   ==> "GenerateCoverageReport"
