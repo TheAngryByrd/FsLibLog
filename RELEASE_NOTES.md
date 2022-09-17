@@ -1,3 +1,6 @@
+#### 0.9.2-beta001 - 2022-09-17
+MINOR: Formatting
+
 #### 0.9.1 - 2022-02-03
 * BUGFIX: [fixing doc comment warnings](https://github.com/TheAngryByrd/FsLibLog/pull/30)
 
