@@ -6,15 +6,13 @@ open Fable.Mocha
 open Expecto
 #endif
 
-let allTests = testList "All Tests" [
-    Tests.tests
-]
+let allTests = testList "All Tests" [ Tests.tests ]
 
 [<EntryPoint>]
 let main argv =
-    #if FABLE_COMPILER
+#if FABLE_COMPILER
     printfn "Running tests"
     Mocha.runTests allTests
-    #else
+#else
     Tests.runTestsWithArgs defaultConfig argv allTests
-    #endif
+#endif

@@ -1,7 +1,7 @@
 {
     "type": "module",
     "scripts": {
-        "pretest": "dotnet fable FsLibLog.Tests.fsproj -o dist/tests --commonjs",
+        "pretest": "dotnet fable FsLibLog.Tests.fsproj -o dist/tests",
         "test": "mocha dist/tests --timeout 5000",
         "start": "webpack serve --open",
         "build-for-browser": "webpack"
