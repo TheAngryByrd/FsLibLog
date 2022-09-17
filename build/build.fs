@@ -11,6 +11,14 @@ open Fake.Api
 open Fake.BuildServer
 open Fake.JavaScript
 
+
+System.Environment.GetCommandLineArgs()
+|> Array.toList
+|> Context.FakeExecutionContext.Create false "build.fsx"
+|> Context.RuntimeContext.Fake
+|> Context.setExecutionContext
+
+
 BuildServer.install [
     GitHubActions.Installer
 ]
@@ -126,12 +134,6 @@ module dotnet =
         tool optionConfig "sourcelink" args
 
 
-
-System.Environment.GetCommandLineArgs()
-|> Array.toList
-|> Context.FakeExecutionContext.Create false "build.fsx"
-|> Context.RuntimeContext.Fake
-|> Context.setExecutionContext
 
 
 Target.create "Clean" <| fun _ ->
@@ -403,12 +405,6 @@ Target.create "FormatCode" formatCode
 Target.create "CheckFormatCode" checkFormatCode
 
 Target.create "Release" ignore
-
-
-
-BuildServer.install [
-    GitHubActions.Installer
-]
 
 Option.iter(TraceSecrets.register "<GITHUB_TOKEN>" ) githubToken
 
