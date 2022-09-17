@@ -350,20 +350,23 @@ Target.create "GitHubRelease" <| fun _ ->
 
 let formatCode _ =
     let result =
-        [
-            srcCodeGlob
-            testsCodeGlob
-            adaptersCodeGlob
-            examplesCodeGlob
-        ]
-        |> Seq.collect id
-        // Ignore AssemblyInfo
-        |> Seq.filter(fun f -> f.EndsWith("AssemblyInfo.fs") |> not)
-        |> String.concat " "
-        |> dotnet.fantomas
+        let args =
+            [
+                srcCodeGlob
+                testsCodeGlob
+                adaptersCodeGlob
+                examplesCodeGlob
+            ]
+            |> Seq.collect id
+            // Ignore AssemblyInfo
+            |> Seq.filter(fun f -> f.EndsWith("AssemblyInfo.fs") |> not)
+            |> String.concat " "
+
+        dotnet.fantomas args
 
     if not result.OK then
         Trace.traceErrorfn "Errors while formatting all files: %A" result.Messages
+        failwithf "Errors while formatting all files: %A" result.Messages
 
 
 let checkFormatCode _ =

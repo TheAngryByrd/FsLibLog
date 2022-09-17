@@ -11,8 +11,7 @@ NUGET
       Argu (>= 5.2) - restriction: || (>= net461) (>= netstandard2.0)
       Mono.Cecil (>= 0.10.1) - restriction: || (>= net461) (>= netstandard2.0)
       System.Diagnostics.FileVersionInfo (>= 4.3) - restriction: && (< net461) (>= netstandard2.0)
-    Fable.Core (3.4)
-      FSharp.Core (>= 4.7.2) - restriction: >= netstandard2.0
+    Fable.Core (3.7)
     Fable.Mocha (2.10)
       Fable.Core (>= 3.0) - restriction: >= netstandard2.0
       FSharp.Core (>= 4.7) - restriction: >= netstandard2.0
