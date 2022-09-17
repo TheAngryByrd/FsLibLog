@@ -1,8 +1,3 @@
-#load ".fake/build.fsx/intellisense.fsx"
-#if !FAKE
-#r "Facades/netstandard"
-#r "netstandard"
-#endif
 open System
 open Fake.SystemHelper
 open Fake.Core
@@ -24,13 +19,13 @@ BuildServer.install [
 // Metadata and Configuration
 //-----------------------------------------------------------------------------
 
-let rootDir = __SOURCE_DIRECTORY__
+let rootDir = __SOURCE_DIRECTORY__ </> ".."
 
-let release = Fake.Core.ReleaseNotes.load "RELEASE_NOTES.md"
+let release = lazy (Fake.Core.ReleaseNotes.load "RELEASE_NOTES.md")
 let productName = "FsLibLog"
 let sln = "FsLibLog.sln"
-let srcGlob =__SOURCE_DIRECTORY__  @@ "src/**/*.??proj"
-let testsGlob = __SOURCE_DIRECTORY__  @@ "tests/**/*.??proj"
+let srcGlob = rootDir  </> "src/**/*.??proj"
+let testsGlob = rootDir  </> "tests/**/*.??proj"
 
 let srcCodeGlob =
     !! (rootDir  </> "src/**/*.fs")
@@ -59,16 +54,19 @@ let srcAndTest =
     !! srcGlob
     ++ testsGlob
 
-let distDir = __SOURCE_DIRECTORY__  @@ "dist"
+let distDir = rootDir  </> "dist"
 let distGlob = distDir @@ "*.nupkg"
-let toolsDir = __SOURCE_DIRECTORY__  @@ "tools"
+let toolsDir = rootDir  </> "tools"
 
-let coverageReportDir =  __SOURCE_DIRECTORY__  @@ "docs" @@ "coverage"
+let coverageReportDir =  rootDir  </> "docs" @@ "coverage"
 
 let gitOwner = "TheAngryByrd"
 let gitRepoName = "FsLibLog"
 
 let releaseBranch = "master"
+
+
+let githubToken = Environment.environVarOrNone "GITHUB_TOKEN"
 
 //-----------------------------------------------------------------------------
 // Helpers
@@ -129,6 +127,11 @@ module dotnet =
 
 
 
+System.Environment.GetCommandLineArgs()
+|> Array.toList
+|> Context.FakeExecutionContext.Create false "build.fsx"
+|> Context.RuntimeContext.Fake
+|> Context.setExecutionContext
 
 
 Target.create "Clean" <| fun _ ->
@@ -160,7 +163,7 @@ Target.create "DotnetRestore" <| fun _ ->
     |> Seq.iter(retryIfInCI 10)
 
 Target.create "DotnetBuild" <| fun ctx ->
-
+    let release = release.Value
     let args =
         [
             sprintf "/p:PackageVersion=%s" release.NugetVersion
@@ -254,6 +257,7 @@ Target.create "RunNpmTests" <| fun _ ->
     Npm.exec "test" (fun o -> { o with WorkingDirectory = "./tests/FsLibLog.Tests" } )
 
 Target.create "AssemblyInfo" <| fun _ ->
+    let release = release.Value
     let releaseChannel =
         match release.SemVer.PreRelease with
         | Some pr -> pr.Name
@@ -288,6 +292,7 @@ Target.create "AssemblyInfo" <| fun _ ->
 
 
 Target.create "DotnetPack" <| fun ctx ->
+    let release = release.Value
     !! srcGlob
     |> Seq.iter (fun proj ->
         let args =
@@ -324,6 +329,7 @@ Target.create "Publish" <| fun _ ->
         )
 
 Target.create "GitRelease" <| fun _ ->
+    let release = release.Value
     isReleaseBranchCheck ()
 
     let releaseNotesGitCommitFormat = release.Notes |> Seq.map(sprintf "* %s\n") |> String.concat ""
@@ -336,16 +342,17 @@ Target.create "GitRelease" <| fun _ ->
     Git.Branches.pushTag "" "origin" release.NugetVersion
 
 Target.create "GitHubRelease" <| fun _ ->
-   let token =
-       match Environment.environVarOrDefault "GITHUB_TOKEN" "" with
-       | s when not (String.IsNullOrWhiteSpace s) -> s
+    let release = release.Value
+    let token =
+       match githubToken with
+       | Some s when not (String.IsNullOrWhiteSpace s) -> s
        | _ -> failwith "please set the github_token environment variable to a github personal access token with repro access."
 
 
-   GitHub.createClientWithToken token
-   |> GitHub.draftNewRelease gitOwner gitRepoName release.NugetVersion (release.SemVer.PreRelease <> None) release.Notes
-   |> GitHub.publishDraft
-   |> Async.RunSynchronously
+    GitHub.createClientWithToken token
+    |> GitHub.draftNewRelease gitOwner gitRepoName release.NugetVersion (release.SemVer.PreRelease <> None) release.Notes
+    |> GitHub.publishDraft
+    |> Async.RunSynchronously
 
 
 let formatCode _ =
@@ -398,32 +405,45 @@ Target.create "CheckFormatCode" checkFormatCode
 Target.create "Release" ignore
 
 
+
+BuildServer.install [
+    GitHubActions.Installer
+]
+
+Option.iter(TraceSecrets.register "<GITHUB_TOKEN>" ) githubToken
+
+
 // Only call Clean if DotnetPack was in the call chain
 // Ensure Clean is called before DotnetRestore
-"Clean" ?=> "DotnetRestore"
-"Clean" ==> "DotnetPack"
+"Clean" ?=> "DotnetRestore" |> ignore
+"Clean" ==> "DotnetPack" |> ignore
 
 // // Only call AssemblyInfo if Publish was in the call chain
 // // Ensure AssemblyInfo is called after DotnetRestore and before DotnetBuild
-"DotnetRestore" ?=> "AssemblyInfo"
-"AssemblyInfo" ?=> "DotnetBuild"
-"AssemblyInfo" ==> "Publish"
+"DotnetRestore" ?=> "AssemblyInfo" |> ignore
+"AssemblyInfo" ?=> "DotnetBuild" |> ignore
+"AssemblyInfo" ==> "Publish" |> ignore
 
-"RunNpmInstall" ==> "RunNpmTests"
-
-"DotnetRestore"
-  ==> "CheckFormatCode"
-  ==> "DotnetBuild"
-  ==> "DotnetTest"
-  ==> "GenerateCoverageReport"
-  ==> "RunNpmTests"
-  ==> "DotnetPack"
-  ==> "GitRelease"
-  ==> "GitHubRelease"
-  ==> "Release"
+"RunNpmInstall" ==> "RunNpmTests" |> ignore
 
 "DotnetRestore"
- ==> "WatchTests"
+==> "CheckFormatCode"
+==> "DotnetBuild"
+==> "DotnetTest"
+==> "GenerateCoverageReport"
+==> "RunNpmTests"
+==> "DotnetPack"
+==> "GitRelease"
+==> "GitHubRelease"
+==> "Release"
+|> ignore
+
+"DotnetRestore"
+==> "WatchTests"
+|> ignore
 
 
 Target.runOrDefaultWithArguments "DotnetPack"
+
+//-----------------------------------------------------------------------------
+// Target Start
