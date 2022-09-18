@@ -12,7 +12,11 @@ open Fake.BuildServer
 open Fake.JavaScript
 
 
-System.Environment.GetCommandLineArgs()
+let getCLIArgs () =
+    System.Environment.GetCommandLineArgs()
+    |> Array.skip 1 // The first element in the array contains the file name of the executing program
+
+getCLIArgs ()
 |> Array.toList
 |> Context.FakeExecutionContext.Create false "build.fsx"
 |> Context.RuntimeContext.Fake
