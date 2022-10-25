@@ -263,11 +263,11 @@ You can implement and teach FsLibLog about your own custom provider if one is no
 
 ### Using the Example JsConsoleProvider
 
-This can look something like [JsConsoleProvider](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/JsConsoleProvider/JsConsoleProvider.fs), with simple & direct logging to console. Other log providers, such as one to ship front-end logs to a back-end service, are left as an exercise for the reader.
+This can look something like [JsConsoleProvider](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/JsConsoleExample/JsConsoleProvider.fs), with simple & direct logging to console. Other log providers, such as one to ship front-end logs to a back-end service, are left as an exercise for the reader.
 
 #### Option 1
 
-Copy/paste [JsConsoleProvider.fs](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/JsConsoleProvider/JsConsoleProvider.fs) into your library.
+Copy/paste [JsConsoleProvider.fs](https://github.com/TheAngryByrd/FsLibLog/blob/master/examples/JsConsoleExample/JsConsoleProvider.fs) into your library.
 
 #### Option 2
 
